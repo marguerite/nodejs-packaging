@@ -1,0 +1,1 @@
+* a module accepts a npmjs.org url, returns dependencies for the module from the url unreversedly [Done]
