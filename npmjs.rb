@@ -11,6 +11,7 @@ class NPMJS
 	end
 
 	@@deps = Array.new
+	@@threads = Array.new
 	
 	def recursive(url="")
 		html = Nokogiri::HTML(open(url))
@@ -19,7 +20,8 @@ class NPMJS
 		unless links.empty?
 			links.each do |link|
 				@@deps << link.text
-				recursive("https://www.npmjs.com/package/" + link.text)
+				thread = Thread.new{recursive("https://www.npmjs.com/package/" + link.text)}
+				@@threads << thread
 			end
 		end
 	end
@@ -28,10 +30,12 @@ class NPMJS
 
 		recursive(url)	
 
+		@@threads.each {|t| t.join}
+
 		return @@deps.uniq!
 
 	end
 
 end
 
-p NPMJS.new("gulp").get
+p NPMJS.new("npm").get
