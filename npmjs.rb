@@ -28,10 +28,10 @@ class NPMJS
 
 		recursive(url)	
 
-		return @@deps
+		return @@deps.uniq!
 
 	end
 
 end
 
-p NPMJS.new("glob").get
+p NPMJS.new("gulp").get
