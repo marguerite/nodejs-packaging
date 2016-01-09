@@ -4,22 +4,34 @@ class NPMJS
 	require 'open-uri'
 	require 'nokogiri'
 
-	# https://www.npmjs.com/package/gulp
 	def initialize(name="")
 
 		@url = "https://www.npmjs.com/package/" + name
 
 	end
 
-	def depends(url=@url)
-		deps = Array.new
+	@@deps = Array.new
+	
+	def recursive(url="")
 		html = Nokogiri::HTML(open(url))
 		# start from 0
 		links = html.css("div.sidebar p.list-of-links")[1].css("a")
-		links.each { |link| deps << link.text }
-		return deps
+		unless links.empty?
+			links.each do |link|
+				@@deps << link.text
+				recursive("https://www.npmjs.com/package/" + link.text)
+			end
+		end
+	end
+
+	def get(url=@url)
+
+		recursive(url)	
+
+		return @@deps
 
 	end
 
 end
 
+p NPMJS.new("glob").get
