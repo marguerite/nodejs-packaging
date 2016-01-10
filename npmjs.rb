@@ -1,4 +1,4 @@
-# get dependencies for a module, no dependencies for dependencies
+# get all dependencies for a module
 class NPMJS
 
 	require 'open-uri'
@@ -20,8 +20,10 @@ class NPMJS
 		unless links.empty?
 			links.each do |link|
 				@@deps << link.text
-				thread = Thread.new{recursive("https://www.npmjs.com/package/" + link.text)}
-				@@threads << thread
+				unless link.text == nil
+					thread = Thread.new{recursive("https://www.npmjs.com/package/" + link.text)}
+					@@threads << thread
+				end
 			end
 		end
 	end
@@ -32,10 +34,13 @@ class NPMJS
 
 		@@threads.each {|t| t.join}
 
-		return @@deps.uniq!
+		if @@deps.size > 1
+			return @@deps.uniq! 
+		else
+			return @@deps
+		end
 
 	end
 
 end
 
-p NPMJS.new("npm").get
