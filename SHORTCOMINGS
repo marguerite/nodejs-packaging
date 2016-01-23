@@ -1,0 +1,3 @@
+* the '||' operator can't be translated, because RPM doesn't have this
+* the prerelease tag can't be handled like npm, because RPM can't just compare
+  the prerelease numbers, that is, 3.4.5-alpha.1 is greater than 1.2.3-alpha.1

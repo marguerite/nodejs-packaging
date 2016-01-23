@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'json'
+
+filelist,provides = [],[]
+
+ARGF.each do |f|
+
+	# escape local dependencies in package's node_modules
+	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
+		filelist << f.strip!
+	end
+
+end
+
+filelist.each do |f|
+
+	str = ""
+	File.open(f) {|f| str = f.read}
+	js = JSON.parse(str)
+
+	provides << "npm(" + js["name"] + ") = " + js["version"]
+
+end
+
+puts provides
+

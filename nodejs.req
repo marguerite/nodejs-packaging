@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'json'
+require_relative 'nodejs/semver.rb'
+include Semver
+
+filelist,requires = [],[]
+
+ARGF.each do |f|
+
+        # escape local dependencies in package's node_modules
+        unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
+                filelist << f.strip!
+        end
+
+end
+
+filelist.each do |f|
+
+        str = ""
+        File.open(f) {|f| str = f.read}
+        js = JSON.parse(str)
+
+        js["dependencies"].each do |k,v|
+
+		requires += Semver.parse(k,v)
+
+	end
+
+end
+
+requires.each {|f| puts f}
