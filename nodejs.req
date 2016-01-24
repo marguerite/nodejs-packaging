@@ -5,9 +5,17 @@ require 'json'
 require_relative 'nodejs/semver.rb'
 include Semver
 
-filelist,requires = [],[]
+filelist = []
 
-ARGF.each do |f|
+# local test block start
+array = []
+File.open("1.txt") do |f|
+    f.each_line {|l| array << l}
+end
+array.each do |f|
+# local test block end
+
+#ARGF.each do |f|
 
         # escape local dependencies in package's node_modules
         unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
@@ -23,11 +31,19 @@ filelist.each do |f|
         js = JSON.parse(str)
 
         js["dependencies"].each do |k,v|
+            
+                requires = {}
 
-		requires += Semver.parse(k,v)
+		requires = Semver.parse(k,v)
+                
+                requires.each do |m,n|
+                    n.each do |i|
+                        op = i.gsub(/[0-9].*$/,'')
+                        ver = i.gsub(op,'')
+                        puts "npm(#{m}) #{op} #{ver}"
+                    end
+                end
 
 	end
 
 end
-
-requires.each {|f| puts f}

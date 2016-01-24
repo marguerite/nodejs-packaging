@@ -1,6 +1,6 @@
 module Semver
 
-    def range2comp(range="")
+    def self.range2comp(range="")
 
         comparators = []
 
@@ -15,8 +15,8 @@ module Semver
             end
             big = 0
             sa.each_index {|i| big = i if sa[i] >= sa[big] }
-            longest = temp[big]
-            comparators = range2comp[longest]
+            longest = temp[big].strip!
+            comparators = range2comp(longest)
         elsif range.index(/\s-\s/)
             # 1.2.3 - 4.5.6, temp = ['1.2.3 ',' 4.5.6']
             temp = range.split('-')
@@ -44,7 +44,7 @@ module Semver
     def self.parse(name="",range="")
 
         comparators = range2comp(range)
-        dep = []
+        dep = {}
 
         comparators.each do |comparator|
 
@@ -84,19 +84,43 @@ module Semver
                     when ">"
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        dep << ["npm(" + name + ") > " + va[0] + "." + va[1] + "." + va[2]]
+                        
+                        if dep.has_key?(name)
+                            dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}"
+                        else
+                            dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}"]
+                        end
+                        
                     when ">="
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        dep << ["npm(" + name + ") >= " + va[0] + "." + va[1] + "." + va[2]]
+                        
+                        if dep.has_key?(name)
+                            dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}"
+                        else
+                            dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}"]
+                        end
+                        
                     when "<"
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        dep << ["npm(" + name + ") < " + va[0] + "." + va[1] + "." + va[2]]
+                        
+                        if dep.has_key?(name)
+                            dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}"
+                        else
+                            dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}"]
+                        end
+                        
                     when "<="
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        dep << ["npm(" + name + ") <= " + va[0] + "." + va[1] + "." + va[2]]
+                        
+                        if dep.has_key?(name)
+                            dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}"
+                        else
+                            dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}"]
+                        end
+                        
                     when "~"
                         if va[0] == '0'
                             if va[1].index(/x|X/)
@@ -115,8 +139,12 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         low = va[0] + '.' + va[1] + '.' + va[2]
                         
-                        dep << "npm(" + name + ") >= " + low
-                        dep << "npm(" + name + ") < " + high
+                        if dep.has_key?(name)
+                            dep[name] << ">=#{low}"
+                            dep[name] << "<#{high}"
+                        else
+                            dep[name] = [">=#{low}","<#{high}"]
+                        end
                         
                     when "^"
                         if va[0] == '0'
@@ -136,28 +164,62 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         low = va[0] + '.' + va[1] + '.' + va[2]
                         
-                        dep << "npm(" + name + ") >= " + low
-                        dep << "npm(" + name + ") < " + high
+                        if dep.has_key?(name)
+                            dep[name] << ">=#{low}"
+                            dep[name] << "<#{high}"
+                        else
+                            dep[name] = [">=#{low}","<#{high}"]
+                        end
+                        
                     when "*"
-                        dep << "npm(" + name + ") >= 0.0.0"
+                        
+                        if dep.has_key?(name)
+                            dep[name] << ">=0.0.0"
+                        else
+                            dep[name] = [">=0.0.0"]
+                        end
+                        
                     end
 
                 else
                     if va[1].index(/x|X/)
-                        dep << "npm(" + name + ") >= " + va[0] + ".0.0"
-                        dep << "npm(" + name + ") < " + (va[0].to_i + 1).to_s + ".0.0"
+                        
+                        if dep.has_key?(name)
+                            dep[name] << ">=#{va[0]}.0.0"
+                            dep[name] << "<#{(va[0].to_i + 1).to_s}.0.0"
+                        else
+                            dep[name] = [">=#{va[0]}.0.0","<#{(va[0].to_i + 1).to_s}.0.0"]
+                        end
+                        
                     elsif va[2].index(/x|X/)
-                        dep << "npm(" + name + ") >= " + va[0] + '.' + va[1] + '.0'
-                        dep << "npm(" + name + ") < " + va[0] + '.' + (va[1].to_i + 1).to_s + '.0'
+                        
+                        if dep.has_key?(name)
+                            dep[name] << ">=#{va[0]}.#{va[1]}.0"
+                            dep[name] << "<#{va[0]}.#{(va[1].to_i + 1).to_s}.0"
+                        else
+                            dep[name] = [">=#{va[0]}.#{va[1]}.0","<#{va[0]}.#{(va[1].to_i + 1).to_s}.0"]
+                        end    
+                            
                     elsif va == ["0","0","0"]
-                        dep << "npm(" + name + ") >= 0.0.0"
+                        
+                        if dep.has_key?(name)
+                            dep[name] << [">=0.0.0"]
+                        else
+                            dep[name] = [">=0.0.0"]
+                        end
+                        
                     else
-                        dep << "npm(" + name + ") = " + va[0] + "." + va[1] + "." + va[2]
+                        
+                        if dep.has_key?(name)
+                            dep[name] << "=#{va[0]}.#{va[1]}.#{va[2]}"
+                        else
+                            dep[name] = ["=#{va[0]}.#{va[1]}.#{va[2]}"]
+                        end
                     end
 		end
 
             end
-            
+
         return dep
 
     end
