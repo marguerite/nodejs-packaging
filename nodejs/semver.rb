@@ -6,20 +6,30 @@ module Semver
 
         # '1.2.3 || 4.5.6'
         if range.index('||')
-            p "RPM can't handle 'or' conditional, please check manually: #{range}"
+            # "RPM can't handle 'or' conditional, by default we use the longest conditional
+            # which usually the best
+            temp = range.split("||")
+            sa = []
+            temp.each_index do |i|
+               sa[i] = temp[i].size
+            end
+            big = 0
+            sa.each_index {|i| big = i if sa[i] >= sa[big] }
+            longest = temp[big]
+            comparators = range2comp[longest]
         elsif range.index(/\s-\s/)
-            # 1.2.3 - 4.5.6, comptemp = ['1.2.3 ',' 4.5.6']
-            comptemp = range.split('-')
-            if comptemp[1].index('.')
-               va = comptemp[1].strip!.split('.')
+            # 1.2.3 - 4.5.6, temp = ['1.2.3 ',' 4.5.6']
+            temp = range.split('-')
+            if temp[1].index('.')
+               va = temp[1].strip!.split('.')
                if va.size < 3
-                   comparators = [">=" + comptemp[0].strip!,"<" + va[0] + '.' + (va[1].to_i + 1).to_s +    '.0']
+                   comparators = [">=" + temp[0].strip!,"<" + va[0] + '.' + (va[1].to_i + 1).to_s +    '.0']
                else
-                   comparators = [">=" + comptemp[0].strip!,"<=" + comptemp[1]]
+                   comparators = [">=" + temp[0].strip!,"<=" + temp[1]]
                end
             else
                # 1.2.3 - 4
-               comparators = [">=" + comptemp[0].strip!,"<" + (comptemp[1].strip!.to_i + 1).to_s + '.0.0']
+               comparators = [">=" + temp[0].strip!,"<" + (temp[1].strip!.to_i + 1).to_s + '.0.0']
             end
         elsif range.index(/\s/)
             comparators = range.split(/\s/)
