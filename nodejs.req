@@ -3,47 +3,106 @@
 require 'rubygems'
 require 'json'
 require_relative 'nodejs/semver.rb'
+require_relative 'nodejs/vcmp.rb'
 include Semver
+include Vcmp
 
-filelist = []
+reqlist,provlist = [],[]
+selfreq,selfprov = {},{}
 
 # local test block start
-array = []
-File.open("1.txt") do |f|
-    f.each_line {|l| array << l}
-end
-array.each do |f|
+#array = []
+#File.open("1.txt") do |f|
+#    f.each_line {|l| array << l}
+#end
+#array.each do |f|
 # local test block end
 
-#ARGF.each do |f|
+ARGF.each do |f|
 
-        # escape local dependencies in package's node_modules
-        unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-                filelist << f.strip!
-        end
+    reqlist << f.strip!
+    
+    if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
+        provlist << f
+    end
 
 end
 
-filelist.each do |f|
+# 1. parse the reqlist
 
+reqlist.each do |f|
         str = ""
         File.open(f) {|f| str = f.read}
         js = JSON.parse(str)
-
-        js["dependencies"].each do |k,v|
-            
-                requires = {}
-
-		requires = Semver.parse(k,v)
-                
-                requires.each do |m,n|
-                    n.each do |i|
-                        op = i.gsub(/[0-9].*$/,'')
-                        ver = i.gsub(op,'')
-                        puts "npm(#{m}) #{op} #{ver}"
+        
+        unless js["dependencies"] == nil
+            js["dependencies"].each do |k,v|
+                deps = Semver.parse(k,v)
+                # {"semver"=>[">=4.1.0","<5.0.0"]}
+                deps.each do |m,n|
+                    if selfreq.has_key?(m)
+                        n.each { |i| selfreq[m] << i }
+                    else
+                        selfreq[m] = n
                     end
                 end
+            end
+        end
+end
 
-	end
+# uniq selfreq
+selfreq.each do |k,v|
+    selfreq[k] = (v.uniq! if v.uniq!) || v
+end
 
+# 2. parse the provlist
+
+unless provlist.empty?
+    provlist.each do |f|
+        str = ""
+        File.open(f) {|f| str = f.read}
+        js = JSON.parse(str)
+        
+        if selfprov.has_key?(js["name"])
+            selfprov[js["name"]] << js["version"]
+        else
+            selfprov[js["name"]] = [js["version"]]
+        end
+    end
+end
+
+# uniq selfprov
+selfprov.each do |k,v|
+    selfprov[k] = (v.uniq! if v.uniq!) || v
+end
+
+# 3. parse the reqs
+
+selfreq.each do |k,v| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
+    selfprov.each do |m,n| # "clone" => ["0.2.0", "1.0.2"]
+        if k == m
+            v.delete_if do |i| # >=0.5.0
+                n.each do |j|
+                    op = i.gsub(/[0-9].*$/,'')
+                    ve = i.gsub(op,'')
+                    true if Vcmp.comp(j,op,ve)
+                end
+            end
+        end
+    end
+end
+
+# clean empty dependencies
+selfreq.delete_if do |k,v|
+        true if v.empty?
+end
+
+# 4. print the real reqs
+
+selfreq.each do |k,v|
+        v.each do |i|
+                op = i.gsub(/[0-9].*$/,'')
+                ve = i.gsub(op,'')
+                puts "npm(#{k}) #{op} #{ve}"
+        end
 end
