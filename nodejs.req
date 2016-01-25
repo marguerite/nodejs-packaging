@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 require 'rubygems'
 require 'json'
@@ -12,7 +12,7 @@ selfreq,selfprov = {},{}
 
 # local test block start
 #array = []
-#File.open("1.txt") do |f|
+#File.open("/home/abuild/rpmbuild/BUILD/1.txt") do |f|
 #    f.each_line {|l| array << l}
 #end
 #array.each do |f|
@@ -20,11 +20,13 @@ selfreq,selfprov = {},{}
 
 ARGF.each do |f|
 
+  unless f.index(/\/test\//)
     reqlist << f.strip!
     
     if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
         provlist << f
     end
+  end
 
 end
 
@@ -40,10 +42,10 @@ reqlist.each do |f|
                 deps = Semver.parse(k,v)
                 # {"semver"=>[">=4.1.0","<5.0.0"]}
                 deps.each do |m,n|
-                    if selfreq.has_key?(m)
-                        n.each { |i| selfreq[m] << i }
+                    if selfreq.has_key?(m.to_sym)
+                        n.each { |i| selfreq[m.to_sym] << i }
                     else
-                        selfreq[m] = n
+                        selfreq[m.to_sym] = n
                     end
                 end
             end
@@ -51,9 +53,7 @@ reqlist.each do |f|
 end
 
 # uniq selfreq
-selfreq.each do |k,v|
-    selfreq[k] = (v.uniq! if v.uniq!) || v
-end
+selfreq.each {|k,v| selfreq[k] = (v.uniq! if v.uniq!) || v}
 
 # 2. parse the provlist
 
@@ -62,47 +62,50 @@ unless provlist.empty?
         str = ""
         File.open(f) {|f| str = f.read}
         js = JSON.parse(str)
-        
-        if selfprov.has_key?(js["name"])
-            selfprov[js["name"]] << js["version"]
+     
+        if selfprov.has_key?(js["name"].to_sym)
+            selfprov[js["name"].to_sym] << js["version"]
         else
-            selfprov[js["name"]] = [js["version"]]
+            selfprov[js["name"].to_sym] = [js["version"]]
         end
     end
 end
 
 # uniq selfprov
-selfprov.each do |k,v|
-    selfprov[k] = (v.uniq! if v.uniq!) || v
-end
+selfprov.each {|k,v| selfprov[k] = (v.uniq! if v.uniq!) || v}
 
 # 3. parse the reqs
 
-selfreq.each do |k,v| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
-    selfprov.each do |m,n| # "clone" => ["0.2.0", "1.0.2"]
-        if k == m
-            v.delete_if do |i| # >=0.5.0
-                n.each do |j|
-                    op = i.gsub(/[0-9].*$/,'')
-                    ve = i.gsub(op,'')
-                    true if Vcmp.comp(j,op,ve)
-                end
-            end
-        end
-    end
-end
+reqs = {}
 
-# clean empty dependencies
-selfreq.delete_if do |k,v|
-        true if v.empty?
+selfreq.each do |k,v| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
+
+    a = {}
+
+    if selfprov.key?(k) # "vinyl"
+
+	selfprov[k].each do |i| # "0.5.5"
+
+		a = v.delete_if { |j| # >=0.5.0
+			op = j.gsub(/[0-9].*$/,'')
+			ve = j.gsub(op,'')
+			Vcmp.comp(i,op,ve)
+		    }
+	end
+
+    end
+
+    reqs[k] = a
+
 end
 
 # 4. print the real reqs
 
-selfreq.each do |k,v|
+reqs.each do |k,v|
         v.each do |i|
                 op = i.gsub(/[0-9].*$/,'')
                 ve = i.gsub(op,'')
                 puts "npm(#{k}) #{op} #{ve}"
         end
 end
+

@@ -1,20 +1,25 @@
-#!/usr/bin/env ruby
+#!/usr/bin/ruby
 
 require 'rubygems'
 require 'json'
 
-filelist,provides = [],[]
+pub,priv,provides = [],[],[]
+internal = {}
 
 ARGF.each do |f|
 
 	# escape local dependencies in package's node_modules
 	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-		filelist << f.strip!
+		put << f.strip!
+	else
+		unless f.index(/\/(test|example.*)\//)
+			priv << f.strip!
+		end
 	end
 
 end
 
-filelist.each do |f|
+pub.each do |f|
 
 	str = ""
 	File.open(f) {|f| str = f.read}
@@ -24,5 +29,30 @@ filelist.each do |f|
 
 end
 
-puts provides
+unless priv.empty?
+    priv.each do |f|
+        str = ""
+        File.open(f) {|f| str = f.read}
+        js = JSON.parse(str)
+
+        if internal.key?(js["name"].to_sym)
+            internal[js["name"].to_sym] << js["version"]
+        else
+            internal[js["name"].to_sym] = [js["version"]]
+        end
+    end
+end
+
+# uniq priv
+priv.each {|k,v| priv[k] = (v.uniq! if v.uniq!) || v}
+
+provides.each do |i|
+	puts i
+end
+
+priv.each do |k,v|
+	v.each do |i|
+		puts "npminternal(#{k}) = #{i}"
+	end
+end
 
