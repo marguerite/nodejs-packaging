@@ -50,7 +50,7 @@ provides.each {|i| puts i }
 
 internal.each do |k,v|
 	v.each do |i|
-		puts "bundle(#{k}) = #{i}"
+		puts "own(#{k}) = #{i}"
 	end
 end
 
