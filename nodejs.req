@@ -76,32 +76,29 @@ selfprov.each {|k,v| selfprov[k] = (v.uniq! if v.uniq!) || v}
 
 # 3. parse the reqs
 
-reqs = {}
+selfreq.keys.each do |req| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
 
-selfreq.each do |k,v| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
+    selfprov.keys.each do |prov|  # "vinyl"
 
-    a = {}
+	if req.eql? prov
 
-    if selfprov.key?(k) # "vinyl"
-
-	selfprov[k].each do |i| # "0.5.5"
-
-		a = v.delete_if { |j| # >=0.5.0
+	    selfprov[prov].each do |i|
+		selfreq[req].reject!  { |j| # >=0.5.0
 			op = j.gsub(/[0-9].*$/,'')
 			ve = j.gsub(op,'')
 			Vcmp.comp(i,op,ve)
 		    }
+	    end
+
 	end
 
     end
-
-    reqs[k] = a
 
 end
 
 # 4. print the real reqs
 
-reqs.each do |k,v|
+selfreq.each do |k,v|
         v.each do |i|
                 op = i.gsub(/[0-9].*$/,'')
                 ve = i.gsub(op,'')

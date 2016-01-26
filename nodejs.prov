@@ -10,7 +10,7 @@ ARGF.each do |f|
 
 	# escape local dependencies in package's node_modules
 	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-		put << f.strip!
+		pub << f.strip!
 	else
 		unless f.index(/\/(test|example.*)\//)
 			priv << f.strip!
@@ -43,16 +43,14 @@ unless priv.empty?
     end
 end
 
-# uniq priv
-priv.each {|k,v| priv[k] = (v.uniq! if v.uniq!) || v}
+# uniq internal
+internal.each {|k,v| internal[k] = (v.uniq! if v.uniq!) || v}
 
-provides.each do |i|
-	puts i
-end
+provides.each {|i| puts i }
 
-priv.each do |k,v|
+internal.each do |k,v|
 	v.each do |i|
-		puts "npminternal(#{k}) = #{i}"
+		puts "bundle(#{k}) = #{i}"
 	end
 end
 
