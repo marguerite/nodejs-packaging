@@ -107,7 +107,7 @@ end
 
 node,min = [],[]
 
-Dir.glob("./lib/**/package.json") do |j|
+reqlist.each do |j|
 
 	File.open(j) do |f|
 		str = f.read
