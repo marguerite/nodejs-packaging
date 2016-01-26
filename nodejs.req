@@ -117,6 +117,7 @@ reqlist.each do |j|
 				unless k != "node" || v == nil || v == "*" # "*" means >= 0.0.0
 					m = v.gsub(/[0-9].*/,'')
 					v = v.gsub(m,'') # remove the ">=", always be
+					v = v.gsub(/x|X/,'0') # replace 0.1.x with 0.1.0
 					unless node.include?(v)
 						node << v
 					end
