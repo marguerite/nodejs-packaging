@@ -10,10 +10,11 @@ include Vcmp
 reqlist,provlist = [],[]
 selfreq,selfprov = {},{}
 
-# ARGF.each do |f| unknown problem: the later nested each
+#ARGF.each do |f| 
+# unknown problem: the later nested each
 # in #3 step won't run completely ( 19 times vs. 14000+ times)
 Dir.glob("/home/abuild/rpmbuild/BUILDROOT/**/package.json") do |f|
-
+#  f = f.strip!
   unless f.index(/\/test\//)
     reqlist << f
     
@@ -102,3 +103,47 @@ selfreq.each do |k,v|
         end
 end
 
+# 5. calculate the minimum node version for compatibility
+
+node,min = [],[]
+
+Dir.glob("./lib/**/package.json") do |j|
+
+	File.open(j) do |f|
+		str = f.read
+		json = JSON.parse str
+		if json["engines"]
+			json["engines"].each do |k,v|
+				unless k != "node" || v == nil || v == "*" # "*" means >= 0.0.0
+					m = v.gsub(/[0-9].*/,'')
+					v = v.gsub(m,'') # remove the ">=", always be
+					unless node.include?(v)
+						node << v
+					end
+				end
+			end
+		end
+	end
+
+end
+
+node = ( node.uniq! if node.uniq! ) || node
+
+node.each do |v|
+	va = v.split('.')
+	va.push('0') if va.size < 3 # from now va.size = 3
+	va.each_index {|i| va[i] = va[i].to_i} # value to integer
+	if min.empty?
+		min = va
+	else
+		3.times do |i|
+			if min[i] > va[i]
+				min = va
+			elsif min[i] == va[i]
+				next
+			end
+		end
+	end		
+end
+
+puts "nodejs(engine) >= #{min[0].to_s}.#{min[1].to_s}.#{min[2].to_s}"
