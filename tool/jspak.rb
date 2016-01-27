@@ -6,6 +6,8 @@ require 'fileutils'
 
 name = ARGV[0]
 
+$i = 0
+
 def recursive_download(name="",comparator="")
 
 	Dir.mkdir(name) unless Dir.exists? name
@@ -18,11 +20,14 @@ def recursive_download(name="",comparator="")
 
 	unless json["dependencies"] == nil || json["dependencies"].empty?
 		json["dependencies"].each do |k,v|
+			puts "Downloading #{$i}: #{k}"
 			recursive_download(k,v)
 		end
 	end
 
 	Dir.chdir(old)
+
+	$i += 1
 
 end
 

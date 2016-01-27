@@ -22,7 +22,11 @@ module PKGJSON
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
         url = "https://www.npmjs.com/package/" + name
         html = Nokogiri::HTML(open(url))
-        upstream = html.css('div.sidebar ul.box li')[1].css('strong').text # '1.0.2'
+	unless html.css('div.sidebar ul.box li.last-publisher').empty?
+        	upstream = html.css('div.sidebar ul.box li')[1].css('strong').text # '1.0.2'
+	else # for broken page like the one for 'jsonify'
+		upstream = html.css('div.sidebar ul.box li')[0].css('strong').text # usually '0.0.0'
+	end
 
 	# calculate proper version to download
 	comphash.reject! do |k,hv|
@@ -77,4 +81,4 @@ module PKGJSON
 
 end
 
-#p PKGJSON.get('clone','~1.0.2')
+#p PKGJSON.get('jsonify','~0.0.0')

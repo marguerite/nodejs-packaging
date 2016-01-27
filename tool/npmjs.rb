@@ -44,3 +44,4 @@ class NPMJS
 
 end
 
+p NPMJS.new("forever").get
