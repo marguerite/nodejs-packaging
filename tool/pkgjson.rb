@@ -18,6 +18,9 @@ module PKGJSON
 
     def self.get(name='',comparator='')
 
+	parent = ""
+	File.open("/root/nodejs-packaging/tool/config") {|f| parent = f.read}
+
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
         url = "https://www.npmjs.com/package/" + name
@@ -58,10 +61,15 @@ module PKGJSON
 	filename = "#{name}-#{version}.tgz"
 	jsonname = filename.gsub('.tgz','.json')
 
-        unless File.exists?(filename)
+	existfiles = Dir.glob("/root/nodejs-packaging/#{parent}/**/#{filename}")
+	if existfiles.empty?
 	    url = "https://registry.npmjs.org/" + name + "/-/" + filename
             Download.get(url)
+	else
+	    FileUtils.ln_s existfiles[0],filename
         end
+
+	
 
         if File.exists?(filename)
             io = IO.popen("tar --warning=none -xf #{filename} package/package.json")
