@@ -34,7 +34,15 @@ module History
 
 		history = self.all(name)
 
-		last = history[history.find_index(version) - 1]
+		# history = ["0.6.2","1.0.0"], version = 0.7.0, condition: <0.7.0 
+		# sometimes the version used to judge doesn't exist in the history.
+		# because eg, author jump from 0.6.2 to 1.0.0 suddenly
+		unless history.include? version
+			a = history.select {|v| v.to_f - version.to_f > 0}
+			last = history[history.find_index(a[0]) -1]
+		else
+			last = history[history.find_index(version) - 1]
+		end
 
 		return last
 
@@ -42,4 +50,4 @@ module History
 
 end
 
-#p History.last("clone","1.0.0")
+#p History.last("colors","0.7.0")

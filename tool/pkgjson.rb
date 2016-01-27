@@ -18,9 +18,6 @@ module PKGJSON
 
     def self.get(name='',comparator='')
 
-	Dir.mkdir name unless Dir.exists?(name)
-	Dir.chdir name
-
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
         url = "https://www.npmjs.com/package/" + name
