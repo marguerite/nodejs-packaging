@@ -4,6 +4,7 @@ module History
 
 	require_relative 'download.rb'
 	include Download
+	require 'rubygems'
 	require 'json'
 	require 'fileutils'
 
