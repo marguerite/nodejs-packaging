@@ -6,7 +6,6 @@ module History
 	include Download
 	require 'rubygems'
 	require 'json'
-	require 'fileutils'
 
 	def self.all(name="")
 
@@ -16,7 +15,6 @@ module History
 
 		if File.exists?(file)
 			File.open(file) {|f| str = f.read}
-			FileUtils.rm_rf file
 		end
 
 		json = JSON.parse(str)
