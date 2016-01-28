@@ -15,6 +15,18 @@ module Dependencies
 
     @@download,@@dependencies = {},{}
 
+    def self.parent(json="",parent="")
+
+	json = JSON.parse(json)
+
+        if json.keys.include?(parent)
+           p parent
+        else
+           p json.values["dependencies"]
+        end
+
+    end
+
     def self.get(name='',comparator='',parent='')
 
 	comparator = "*" if comparator == nil
@@ -58,7 +70,7 @@ module Dependencies
 	if parent
 		
 	else
-		
+	   
 	end
 
 	json["dependencies"].each do |k,v|
