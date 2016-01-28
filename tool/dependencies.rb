@@ -13,9 +13,9 @@ module Dependencies
     include History
     include Download
 
-    download,dependencies = {},{}
+    @@download,@@dependencies = {},{}
 
-    def self.get(name='',comparator='')
+    def self.get(name='',comparator='',parent='')
 
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
@@ -53,16 +53,28 @@ module Dependencies
 	# find the dependencies
         str = ""
 	File.open(name) {|f| str = f.read}
-	json = JSON.parse(str)
+	json = JSON.parse(str)["versions"][version]
 
-	return json[version]	
-   
-    end
+	if parent
+		
+	else
+		
+	end
 
-    def self.all
+	json["dependencies"].each do |k,v|
+	#	self.get(k,v)
+		p k,v
+	end
 
+	# write download files
+	if @@download[json["name"]]
+		@@download[json["name"]] << json["version"]
+	else
+		@@download[json["name"]] = [json["version"]]
+	end
+ 
     end
 
 end
 
-p Dependencies.get('phantomjs')
+Dependencies.get('phantomjs')
