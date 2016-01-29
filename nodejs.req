@@ -29,7 +29,7 @@ end
 
 reqlist.each do |f|
         str = ""
-        File.open(f) {|f| str = f.read}
+        File.open(f,'r:UTF-8') {|f| str = f.read}
         js = JSON.parse(str)
         
         unless js["dependencies"] == nil
@@ -55,7 +55,7 @@ selfreq.each {|k,v| selfreq[k] = (v.uniq! if v.uniq!) || v}
 unless provlist.empty?
     provlist.each do |f|
         str = ""
-        File.open(f) {|f| str = f.read}
+        File.open(f,'r:UTF-8') {|f| str = f.read}
         js = JSON.parse(str)
      
         if selfprov.key?(js["name"])
@@ -109,7 +109,7 @@ node,min = [],[]
 
 reqlist.each do |j|
 
-	File.open(j) do |f|
+	File.open(j,'r:UTF-8') do |f|
 		str = f.read
 		json = JSON.parse str
 		if json["engines"]
