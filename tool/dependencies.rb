@@ -4,6 +4,7 @@ module Dependencies
 
     require 'rubygems'
     require 'json'
+    require 'fileutils'
     require_relative '../nodejs/semver.rb'
     require_relative '../nodejs/vcmp.rb'
     require_relative 'history.rb'
@@ -56,23 +57,28 @@ module Dependencies
         str = ""
 	File.open(name) {|f| str = f.read}
 	json = JSON.parse(str)["versions"][version]
+	FileUtils.rm_rf name
 
 	if parent.empty?
 		@@dependencies[name] = {}
 		@@dependencies[name]["version"] = version
 	else
 		ps = Parent.path(@@dependencies,parent)
-		eval(ps)["dependencies"] = {}
+		puts ps
+		eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
 		eval(ps)["dependencies"][name] = {}
 		eval(ps)["dependencies"][name]["version"] = version
 	end
 
+	#p @@dependencies
 	# recursively
-	json["dependencies"].each do |k,v|
-		self.list(k,v,name)
+	unless json["dependencies"] == nil
+		json["dependencies"].each do |k,v|
+			self.list(k,v,name)
+		end
 	end
 
-	p @@dependencies
+	return @@dependencies
 
     end
 end
@@ -85,4 +91,4 @@ end
 	end
 =end
 
-Dependencies.list('phantomjs')
+p Dependencies.list('phantomjs')
