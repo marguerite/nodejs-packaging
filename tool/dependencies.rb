@@ -8,14 +8,16 @@ module Dependencies
     require_relative '../nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
+    require_relative 'parent.rb'
     include Semver    
     include Vcmp
     include History
     include Download
+    include Parent
 
     @@download,@@dependencies = {},{}
 
-    def self.get(name='',comparator='',parent='')
+    def self.list(name='',comparator='',parent='')
 
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
@@ -55,12 +57,25 @@ module Dependencies
 	File.open(name) {|f| str = f.read}
 	json = JSON.parse(str)["versions"][version]
 
-	if parent
-	   
+	if parent.empty?
+		@@dependencies[name] = {}
+		@@dependencies[name]["version"] = version
+	else
+		ps = Parent.path(@@dependencies,parent)
+		eval(ps)["dependencies"] = {}
+		eval(ps)["dependencies"][name] = {}
+		eval(ps)["dependencies"][name]["version"] = version
 	end
 
-	#json["dependencies"]
+	# recursively
+	json["dependencies"].each do |k,v|
+		self.list(k,v,name)
+	end
 
+	p @@dependencies
+
+    end
+end
 =begin
 	# write download files
 	if @@download[json["name"]]
@@ -69,8 +84,5 @@ module Dependencies
 		@@download[json["name"]] = [json["version"]]
 	end
 =end
-    end
 
-end
-
-Dependencies.get('phantomjs')
+Dependencies.list('phantomjs')

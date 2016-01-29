@@ -1,19 +1,19 @@
 module Parent
 
-        @@path = []
+        @@keys = []
 
 	def self.find(json={}, parent="")
 
 	    unless json == nil
 
 	    unless json.key?(parent)
-		@@path << json.keys[0]
+		@@keys << json.keys[0]
 		self.find(json.values[0]["dependencies"],parent)
 	    end
 
 	    end
 
-	    return @@path
+	    return @@keys
 
 	end
 
@@ -25,7 +25,7 @@ module Parent
 
 	    pa.each do |i|
 
-		if prefix == ""
+		if prefix.empty?
 		    prefix = "#{json}[\"#{i}\"][\"dependencies\"]"
 		else
 		    prefix += "[\"#{i}\"][\"dependencies\"]"
