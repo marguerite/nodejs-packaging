@@ -1,23 +1,53 @@
-require 'json'
-	    str = ""
-	    File.open('1.json') {|f| str = f.read }
-	    json = JSON.parse(str)
+module Parent
 
-        $path = []
+        @@path = []
 
-	def find(json={}, parent="")
+	def self.find(json={}, parent="")
 
 	    unless json == nil
 
 	    unless json.key?(parent)
-		$path << json.keys[0]
-		find(json.values[0]["dependencies"],parent)
+		@@path << json.keys[0]
+		self.find(json.values[0]["dependencies"],parent)
 	    end
 
-	    return $path
-
 	    end
+
+	    return @@path
 
 	end
 
-find(json,"adm-zip")
+	def self.path(json={}, parent="")
+
+	    pa = self.find(json,parent)
+
+	    prefix = ""
+
+	    pa.each do |i|
+
+		if prefix == ""
+		    prefix = "#{json}[\"#{i}\"][\"dependencies\"]"
+		else
+		    prefix += "[\"#{i}\"][\"dependencies\"]"
+		end
+
+	    end
+
+	    path = prefix + "[\"#{parent}\"]"
+
+	    return path
+
+	end
+
+end
+
+=begin
+require 'json'
+str = ""
+open("test.json") {|f| str = f.read }
+js = JSON.parse(str)
+parent = "adm-zip"
+path = Parent::path(js,parent)
+
+puts eval(path)
+=end
