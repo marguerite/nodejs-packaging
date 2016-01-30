@@ -1,8 +1,9 @@
 module Dependencies
 
-    # takes a module name and return its package.json in json format
+    # takes a module name, write all its dependent modules
+    # and downloadable files in pretty json
 
-    require 'rubygems'
+    #require 'rubygems'
     require 'json'
     require 'fileutils'
     require_relative '../nodejs/semver.rb'
@@ -14,9 +15,9 @@ module Dependencies
     include Vcmp
     include History
     include Download
-    include Parent
 
     @@download,@@dependencies = {},{}
+    @@time = 0
 
     def self.list(name='',comparator='',parent='')
 
@@ -55,7 +56,7 @@ module Dependencies
 
 	# find the dependencies
         str = ""
-	File.open(name) {|f| str = f.read}
+	open(name) {|f| str = f.read}
 	json = JSON.parse(str)["versions"][version]
 	FileUtils.rm_rf name
 
@@ -63,14 +64,15 @@ module Dependencies
 		@@dependencies[name] = {}
 		@@dependencies[name]["version"] = version
 	else
-		ps = Parent.path(@@dependencies,parent)
-		puts ps
+		ps = Parent.new(@@dependencies,parent).path
 		eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
 		eval(ps)["dependencies"][name] = {}
 		eval(ps)["dependencies"][name]["version"] = version
 	end
 
-	#p @@dependencies
+        @@time += 1
+        puts "#{@@time}:#{name}"
+
 	# recursively
 	unless json["dependencies"] == nil
 		json["dependencies"].each do |k,v|
@@ -78,17 +80,37 @@ module Dependencies
 		end
 	end
 
-	return @@dependencies
-
-    end
-end
-=begin
-	# write download files
+	# write downloadable files
 	if @@download[json["name"]]
 		@@download[json["name"]] << json["version"]
 	else
 		@@download[json["name"]] = [json["version"]]
 	end
-=end
 
-p Dependencies.list('phantomjs')
+	@@download.each {|k,v| v = (v.uniq! if v.uniq!)||v}
+
+    end
+
+    def self.write(name="")
+
+	self.list(name)
+
+	open('dependency.json','w:UTF-8') do |f|
+		f.write JSON.pretty_generate(@@dependencies)
+	end
+
+# {adm-zip:["0.4.7"],wrappy:["1.0.0","1.0.0","1.0.0"]}
+
+	open('todownload.lst','w:UTF-8') do |f|
+		@@download.each do |k,v|
+			v.each do |i|
+				f.write "#{k};#{k}-#{i}\n"
+			end
+		end
+	end
+
+    end
+
+end
+
+Dependencies.write('phantomjs')

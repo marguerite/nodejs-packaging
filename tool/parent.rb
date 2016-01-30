@@ -1,53 +1,64 @@
-module Parent
+class Parent
 
-        @@keys = []
+	def initialize(json={},parent="")
+		@json = json
+		@parent = parent
+		@keys = []
+	end
 
-	def self.find(json={}, parent="")
+	def find(json=@json, parent=@parent)
 
 	    unless json == nil
 	        unless json.key?(parent)
-		    @@keys << json.keys[0]
-		    self.find(json.values[0]["dependencies"],parent)
-	        else
-		    @@keys = [parent]
-	        end
+			if json.keys.size == 1
+				@keys << json.keys[0]
+				self.find(json.values[0]["dependencies"],parent)
+			else
+				json.keys.each do |k|
+					unless json[k]["dependencies"] == nil
+						if json[k]["dependencies"].to_s.index('"' + parent + '"')
+							@keys << k
+							self.find(json[k]["dependencies"],parent)
+						end
+					end
+				end
+			end
+		else
+			@keys << parent
+		end
+		return @keys
 	    end
-
-	    return @@keys
 
 	end
 
-	def self.path(json={}, parent="")
+	def path(json=@json, parent=@parent)
 
-	    pa = self.find(json,parent)
-	    prefix = ""
+	    pa = find(json,parent)
+	    path = ""
 
 	    if pa.size > 1
 		pa.each do |i|
-		    if prefix.empty?
-			prefix = "@@dependencies[\"#{i}\"][\"dependencies\"]"
-		    else
-			prefix += "[\"#{i}\"][\"dependencies\"]"
-		    end
-		end
-	    else
-	        prefix = "@@dependencies"
+			if path == ""
+				path = "@@dependencies[\"#{i}\"]"
+			else
+				path += "[\"dependencies\"][\"#{i}\"]"
+			end
+		end	
+            else
+		path = "@@dependencies[\"#{pa[0]}\"]"
 	    end
-
-	    path = prefix + "[\"#{parent}\"]"
 
 	    return path
 
 	end
 
 end
-
 =begin
 require 'json'
 str = ""
 open("test.json") {|f| str = f.read }
 json = JSON.parse(str)
-parent = "adm-zip"
-path = Parent.path(js,parent)
-puts eval(path)
+parent = "is-absolute"
+path = Parent.new(json,parent).find
+puts path
 =end
