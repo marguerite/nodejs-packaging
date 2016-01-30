@@ -19,6 +19,11 @@
 # no-op macro to allow spec compatibility with EPEL
 %nodejs_find_provides_and_requires %{nil}
 
+%nodejs_prep %{_prefix}/lib/rpm/nodejs.rb --prep
+%nodejs_mkdir %{_prefix}/lib/rpm/nodejs.rb --mkdir
+%nodejs_copy %{_prefix}/lib/rpm/nodejs.rb --copy
+%nodejs_filelist %{_prefix}/lib/rpm/nodejs.rb --filelist
+
 #compat opensuse
 %nodejs_modulesdir %{nodejs_sitelib}
 

@@ -9,7 +9,7 @@ include Dependencies
 name = ARGV[0]
 
 # generate dependency map, downloadable filelist, and complete license string
-#Dependencies.write(name)
+Dependencies.write(name)
 
 # generate source.txt
 
