@@ -57,7 +57,7 @@ module Dependencies
 
 	# find the dependencies
         str = ""
-	open(name) {|f| str = f.read}
+	open(name,'r:UTF-8') {|f| str = f.read}
 	json = JSON.parse(str)["versions"][version]
 	FileUtils.rm_rf name
 

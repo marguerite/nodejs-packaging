@@ -47,7 +47,7 @@ when "--prep"
 when "--mkdir"
     str = ''
     Dir.glob(sourcedir + "/*.json") do |j|
-	open(j) {|f| str = f.read}
+	open(j,'r:UTF-8') {|f| str = f.read}
     end
     json = JSON.parse(str)
     recursive_mkdir(json,buildroot + sitelib)

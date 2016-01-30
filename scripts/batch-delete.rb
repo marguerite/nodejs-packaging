@@ -13,7 +13,7 @@ require 'fileutils'
 
 array = []
 
-File.open("packages.txt") do |f|
+File.open("packages.txt",'r:UTF-8') do |f|
 	f.each_line do |l|
 		array << l.strip!
 	end

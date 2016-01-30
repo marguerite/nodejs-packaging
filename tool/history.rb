@@ -14,7 +14,7 @@ module History
 		file = Download.get(url)
 
 		if File.exists?(file)
-			File.open(file) {|f| str = f.read}
+			File.open(file,'r:UTF-8') {|f| str = f.read}
 		end
 
 		json = JSON.parse(str)
