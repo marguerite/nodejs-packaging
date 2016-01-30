@@ -3,7 +3,6 @@ module Dependencies
     # takes a module name, write all its dependent modules
     # and downloadable files in pretty json
 
-    #require 'rubygems'
     require 'json'
     require 'fileutils'
     require_relative '../nodejs/semver.rb'

@@ -1,0 +1,49 @@
+#
+# spec file for package NAME
+#
+# Copyright (c) 2016 SUSE LINUX GmbH, Nuernberg, Germany.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via http://bugs.opensuse.org/
+#
+
+
+Name:           NAME
+Version:        VERSION
+Release:        0
+Summary:        SUMMARY
+License:        #LICENSE PASTE HERE
+Group:          Development/Languages/NodeJS
+Url:            URL
+Source0:        %{name}.json
+# SOURCE PASTE BELOW
+BuildRequires:  nodejs-packaging
+BuildRoot:      %{_tmppath}/%{name}-%{version}-build
+BuildArch:      noarch
+
+%description
+DESCRIPTION
+
+%prep
+%nodejs_prep
+
+%build
+#nothing to do
+
+%install
+%nodejs_mkdir
+%nodejs_copy
+%nodejs_filelist
+
+%files -f %{_sourcedir}/files.lst
+%defattr(-,root,root,-)
+
+%changelog
