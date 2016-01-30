@@ -7,8 +7,6 @@ include Dependencies
 
 workspace = Dir.pwd
 
-# generate dependency map and downloadable filelist
+# generate dependency map, downloadable filelist, and complete license string
 Dependencies.write(ARGV[0])
-
-
 

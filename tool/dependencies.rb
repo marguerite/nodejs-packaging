@@ -16,8 +16,9 @@ module Dependencies
     include History
     include Download
 
-    @@download,@@dependencies = {},{}
-    @@time = 0
+    @@filelist,@@dependencies = {},{}
+    @@license = []
+    @@number = 0
 
     def self.list(name='',comparator='',parent='')
 
@@ -70,8 +71,8 @@ module Dependencies
 		eval(ps)["dependencies"][name]["version"] = version
 	end
 
-        @@time += 1
-        puts "#{@@time}:#{name}"
+        @@number += 1
+        puts "#{@@number}:#{name}"
 
 	# recursively
 	unless json["dependencies"] == nil
@@ -80,14 +81,28 @@ module Dependencies
 		end
 	end
 
-	# write downloadable files
-	if @@download[json["name"]]
-		@@download[json["name"]] << json["version"]
+	# write downloadable filelist
+	if @@filelist[json["name"]]
+		@@filelist[json["name"]] << json["version"]
 	else
-		@@download[json["name"]] = [json["version"]]
+		@@filelist[json["name"]] = [json["version"]]
 	end
 
-	@@download.each {|k,v| v = (v.uniq! if v.uniq!)||v}
+	# write licenses
+        if json["license"] != nil
+	    if json["license"].class == Hash
+		@@license << json["license"]["type"]
+	    else
+		@@license << json["license"]
+	    end
+	elsif json["licenses"] != nil
+		json["licenses"].each do |h|
+			@@license << h["type"]
+		end
+	end
+
+	@@filelist.each {|k,v| v = (v.uniq! if v.uniq!)||v}
+	@@license = (@@license.uniq! if @@license.uniq!)||@@license
 
     end
 
@@ -99,12 +114,24 @@ module Dependencies
 		f.write JSON.pretty_generate(@@dependencies)
 	end
 
-# {adm-zip:["0.4.7"],wrappy:["1.0.0","1.0.0","1.0.0"]}
-
 	open(name + '.lst','w:UTF-8') do |f|
-		@@download.each do |k,v|
+		@@filelist.each do |k,v|
 			v.each do |i|
 				f.write "#{k};#{k}-#{i}\n"
+			end
+		end
+	end
+
+	open(name + '.license','w:UTF-8') do |f|
+		unless @@license.size > 1
+			@@license.each {|i| f.write i}
+		else
+			@@license.each do |i|
+				unless i == @@license.last
+					f.write i + " and "
+				else
+					f.write i
+				end
 			end
 		end
 	end
