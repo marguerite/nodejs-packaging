@@ -48,4 +48,3 @@ module History
 
 end
 
-#p History.last("colors","0.7.0")

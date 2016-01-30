@@ -53,12 +53,4 @@ class Parent
 	end
 
 end
-=begin
-require 'json'
-str = ""
-open("test.json") {|f| str = f.read }
-json = JSON.parse(str)
-parent = "is-absolute"
-path = Parent.new(json,parent).find
-puts path
-=end
+

@@ -32,4 +32,3 @@ module Download
 
 end
 
-#Download.get("http://registry.npmjs.org/clone")

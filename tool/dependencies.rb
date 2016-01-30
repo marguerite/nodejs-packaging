@@ -95,13 +95,13 @@ module Dependencies
 
 	self.list(name)
 
-	open('dependency.json','w:UTF-8') do |f|
+	open(name + '.json','w:UTF-8') do |f|
 		f.write JSON.pretty_generate(@@dependencies)
 	end
 
 # {adm-zip:["0.4.7"],wrappy:["1.0.0","1.0.0","1.0.0"]}
 
-	open('todownload.lst','w:UTF-8') do |f|
+	open(name + '.lst','w:UTF-8') do |f|
 		@@download.each do |k,v|
 			v.each do |i|
 				f.write "#{k};#{k}-#{i}\n"
@@ -113,4 +113,3 @@ module Dependencies
 
 end
 
-Dependencies.write('phantomjs')
