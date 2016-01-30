@@ -7,6 +7,7 @@ require_relative 'parent.rb'
 str = ''
 Dir.glob("**/*.json") do |j|
 	open(j) do |f|
+#	open('test.json') do |f|
 		str = f.read
 	end
 end
@@ -15,17 +16,19 @@ $workspace = "/home/marguerite/Public/nodejs-packaging/tool"
 
 def recursive_mkdir(json={},workspace=$workspace)
 
-	p json
-
-	json.keys.each do |k|
-		puts "creating #{workspace}/#{k}"
-		FileUtils.mkdir_p workspace + "/" + k
-		if json[k].keys.include?("dependencies")
-			i = json[k]["dependencies"]
-			w = workspace + "/" + k
-			recursive_mkdir(json=i,workspace=w)
+    json.keys.each do |key|
+	puts "creating #{workspace}/#{key}"
+	FileUtils.mkdir_p workspace + "/" + key
+	unless json[key] == nil
+		if json[key].keys.include?("dependencies")
+			json[key]["dependencies"].each do |k,v|
+				i = {}
+				i[k] = v
+				recursive_mkdir(i,workspace + "/" + key)
+			end
 		end
 	end
+    end
 
 end
 

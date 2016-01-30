@@ -13,7 +13,8 @@ name = ARGV[0]
 
 # generate source.txt
 
-i = 0
+# start from 1, 0 will the be 'phantomjs.json'
+i = 1
 
 if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
