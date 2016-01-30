@@ -2,15 +2,11 @@
 
 **Caution!** it can only be used along w/ `rpm` package management. `deb` has no such mechanism it depends to be functional.
 
-#### Dependencies
-
-it needs `json` gem
-
 #### Layouts
 
-* repo_maintenance: the scripts used by me to maintain devel:languages:nodejs on build service.
-                    and test nodejs-packaging at runtime. no need to package this
-* nodejs: ruby modules needed by nodejs.prov and nodejs.req
-* tool: useful tools to package nodejs modules on openSUSE. see README.tool
+* scripts: the scripts used by myself to maintain devel:languages:nodejs on build service.
+                    and test nodejs-packaging at runtime.
+* nodejs: ruby modules needed by nodejs.prov and nodejs.req.
+* tool: useful tools to package nodejs modules on openSUSE.
 
 For a working package, packagers can see the specfile here: [nodejs-packaging](https://build.opensuse.org/package/show/devel:languages:nodejs/nodejs-packaging)
