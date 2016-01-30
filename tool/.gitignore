@@ -1,4 +1,4 @@
 *.tgz
-*.txt
 *.lst
 *.json
+*.source
