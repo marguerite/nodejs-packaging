@@ -23,6 +23,7 @@
 %nodejs_mkdir %{_prefix}/lib/rpm/nodejs.rb --mkdir
 %nodejs_copy %{_prefix}/lib/rpm/nodejs.rb --copy
 %nodejs_filelist %{_prefix}/lib/rpm/nodejs.rb --filelist
+%nodejs_fixdep %{_prefix}/lib/rpm/nodejs-fixdep.rb
 
 #compat opensuse
 %nodejs_modulesdir %{nodejs_sitelib}
