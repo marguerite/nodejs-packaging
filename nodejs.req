@@ -10,10 +10,17 @@ include Vcmp
 reqlist,provlist = [],[]
 selfreq,selfprov = {},{}
 
+if File.directory?("/usr/src/packages") & File.writable?("/usr/src/packages")
+        topdir = "/usr/src/packages"
+else
+        topdir = ENV["HOME"] + "/rpmbuild"
+end
+buildroot = topdir + "/BUILDROOT"
+
 #ARGF.each do |f| 
 # unknown problem: the later nested each
 # in #3 step won't run completely ( 19 times vs. 14000+ times)
-Dir.glob("/home/abuild/rpmbuild/BUILDROOT/**/package.json") do |f|
+Dir.glob(buildroot + "/**/package.json") do |f|
 #  f = f.strip!
   unless f.index(/\/test\//)
     reqlist << f
@@ -113,6 +120,14 @@ reqlist.each do |j|
 		str = f.read
 		json = JSON.parse str
 		if json["engines"]
+		     if json["engines"].class == String
+			m = json["engines"].gsub(/[0-9].*/,'')
+			v = json["engines"].gsub(m,'')
+			v = v.gsub(/x|X/,'0')
+			unless node.include?(v)
+				node << v
+			end
+		     else
 			json["engines"].each do |k,v|
 				unless k != "node" || v == nil || v == "*" # "*" means >= 0.0.0
 					m = v.gsub(/[0-9].*/,'')
@@ -123,6 +138,7 @@ reqlist.each do |j|
 					end
 				end
 			end
+		     end
 		end
 	end
 
