@@ -39,8 +39,8 @@ end
 case ARGV[0]
 when "--prep"
     Dir.glob(sourcedir + "/*.tgz") do |tgz|
-        name = tgz.gsub('.tgz','')
-        io = IO.popen("tar -xf #{tgz}")
+        name = tgz.gsub(/^.*\//,'').gsub('.tgz','')
+        io = IO.popen("tar --warning=none -xf #{tgz} -C #{sourcedir}")
         io.close
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
@@ -60,11 +60,11 @@ when "--copy"
     end
     Dir.glob(buildroot + "/**/*").sort{|x| x.size}.each do |dir|
         name = dir.gsub(/^.*\//,'')
-        prefix = dir.gsub(name,'')
+	prefix = dir.gsub(buildroot,'').gsub(name,'')
         if name.index(/[0-9]\.[0-9]/)
-                FileUtils.mv dir,prefix + name.gsub(/-[0-9].*$/,'')
+                FileUtils.mv dir,buildroot + prefix + name.gsub(/-[0-9].*$/,'')
         end
-	if name.index(/test|example/)
+	if name.index(/test|example|benchmark/)
 		FileUtils.rm_rf dir
 	end
     end

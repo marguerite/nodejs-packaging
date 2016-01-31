@@ -15,7 +15,7 @@ module Download
 			obj.start do |http|
 				http.read_timeout = 500
 				http.request_get path do |resp|
-					open(file,'w:UTF-8') do |io|
+					open(file,'w') do |io|
 						resp.read_body do |chunk|
 							io.write chunk
 						end
