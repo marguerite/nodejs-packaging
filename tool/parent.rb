@@ -32,9 +32,10 @@ class Parent
 	end
 
 	def find(json=@json,parent=@parent)
+            
             unless json == nil
                 
-                count = json.to_s.scan(parent).count
+                count = json.to_s.scan("\"#{parent}\"").count
                 if count > 1
 
                     if json.keys.size == 1
@@ -42,6 +43,7 @@ class Parent
                         find(json.values[0]["dependencies"],parent)
                     else
                         json.each do |k,v|
+                          if k == parent || v.to_s.index(parent)
                             key = []
                             @temp.each {|j| key << j}
                             key << k
@@ -62,9 +64,11 @@ class Parent
                                 @arrkeys[@i] = []
                                 key.each {|k| @arrkeys[@i] << k}
                                 @i += 1
-                                @temp = [@temp[0]] # usually here
+				if @temp.size > 1
+                                	@temp = @temp[0...-1]
+				end
                             end
-                                    
+                          end          
                         end
                     end
                                 
