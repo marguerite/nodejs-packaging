@@ -71,7 +71,7 @@ class Parent
 
 	    pa = find(json,parent)
             p pa
-	    if pa[0] == String
+	    if pa[0].class == String
                 path = ""
                 if pa.size > 1
                     pa.each do |i|
@@ -109,11 +109,11 @@ class Parent
         
 end
 
-=begin
+#=begin
 require 'json'
 str = ""
 File.open('test.json','r:UTF-8') {|f| str = f.read.gsub('=>',':')}
 json = JSON.parse(str)
 parent = "pinkie-promise"
-p Parent.new(json,parent).path
-=end
+p Parent.new(json,parent).find
+#=end

@@ -65,7 +65,7 @@ module Dependencies
 		@@dependencies[name]["version"] = version
 	else
 		ps = Parent.new(@@dependencies,parent).path
-		if ps[0] == String
+		if ps.class == String
 			eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
 			eval(ps)["dependencies"][name] = {}
 			eval(ps)["dependencies"][name]["version"] = version
