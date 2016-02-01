@@ -65,9 +65,17 @@ module Dependencies
 		@@dependencies[name]["version"] = version
 	else
 		ps = Parent.new(@@dependencies,parent).path
-		eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
-		eval(ps)["dependencies"][name] = {}
-		eval(ps)["dependencies"][name]["version"] = version
+		if ps[0] == String
+			eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
+			eval(ps)["dependencies"][name] = {}
+			eval(ps)["dependencies"][name]["version"] = version
+		else
+		    ps.each do |s|
+                        eval(s)["dependencies"] = {} if eval(s)["dependencies"] == nil
+                        eval(s)["dependencies"][name] = {}
+                        eval(s)["dependencies"][name]["version"] = version
+		    end
+		end
 	end
 
         @@number += 1
