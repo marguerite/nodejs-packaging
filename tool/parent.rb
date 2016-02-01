@@ -125,6 +125,6 @@ require 'json'
 str = ""
 File.open('test.json','r:UTF-8') {|f| str = f.read.gsub('=>',':')}
 json = JSON.parse(str)
-parent = "pinkie-promise"
+parent = "read-pkg"
 p Parent.new(json,parent).find
 =end

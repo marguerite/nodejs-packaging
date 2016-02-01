@@ -1,0 +1,1 @@
+{"read-pkg-up"=>{"version"=>"1.0.1", "dependencies"=>{"find-up"=>{"version"=>"1.1.0", "dependencies"=>{"path-exists"=>{"version"=>"2.1.0", "dependencies"=>{"pinkie-promise"=>{"version"=>"2.0.0", "dependencies"=>{"pinkie"=>{"version"=>"2.0.4"}}}}}, "pinkie-promise"=>{"version"=>"2.0.0", "dependencies"=>{"pinkie"=>{"version"=>"2.0.4"}}}}}, "read-pkg"=>{"version"=>"1.1.0"}}}}
