@@ -1,2 +1,7 @@
 * global linking 
 * native-build module if there's .gyp present
+* able to provide multiple 'main' modules while
+  keep the Requires still clean :-)
+* rewrite nodejs-symlink-deps in ruby
+* support SLES 11 SP3 at least.
+  + nodejs.prov and nodejs.req. nova don't need to
