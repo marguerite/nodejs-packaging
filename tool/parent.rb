@@ -4,7 +4,7 @@ class Parent
             @json = json
             @parent = parent
             @keys,@arrkeys,@temp = [],[],[]
-            @i = 0
+            @i,@n = 0,0
 	end
 
 	
@@ -30,6 +30,46 @@ class Parent
             return @keys
 
 	end
+        
+        def get_str(temp=[])
+            str = ""
+            temp.each do |t|
+                if t = temp[0]
+                    str = "@json[\"#{t}\"][\"dependencies\"]"
+                else
+                    str += "[\"#{t}\"][\"dependencies\"]"
+                end
+            end
+            
+            return str
+        end
+        
+        def clean_temp(temp=@temp)
+            
+            newtemp = [temp[-1]]
+           
+            if temp.size > 1 # temp = 1, most of the times don't need to clean
+                last = get_str(temp)
+                looptimes = eval(last).select{|k,v| v.to_s.index(@parent) || k == @parent}.keys.size
+
+                if @arrkeys.to_s.scan(@parent).count == looptimes
+                    temp.each_index do |i|
+                        n = temp.size - i - 1 # 5 - i
+                        #["gulp","gulp-utils","dateformat","meow","read-pkg-up","find-up"]
+                        str = get_str(temp[0...n])
+                        s = eval(str).select{|k,v| k != temp[n+1] && ( v.to_s.index(@parent) || k == @parent)}
+                        newtemp << temp[n]
+                        if s != nil && s.keys.size >= 1
+                            break
+                        else
+                            next
+                        end
+                    end    
+                end
+            end
+            #p temp - newtemp
+            return (temp - newtemp)
+        end
 
 	def find(json=@json,parent=@parent)
             
@@ -69,26 +109,7 @@ class Parent
                         end
                     end
 
-		    # temp ['gulp','gulp-util','dateformat','meow']
-		    #[['gulp','gulp-util','dateformat','meow','normalize-package-data']]
-	            # clear temp: if @arrkeys contains parent, and the last loop in temp
-		    # is over. then clear last temp value
-		    if @temp.size > 1 # temp = 1, most of the times don't need to clean
-		      lasttemp = @temp[-1]
-		      str = ""
-		      a = @temp[0...-1]
-		      a.each do |m|
-			if m = a[0]
-				str = "@json[\"#{m}\"][\"dependencies\"]"
-			else
-				str += "[\"dependencies\"][\"#{m}\"]"
-			end
-		      end
-		      looptimes = eval(str).select{|k,v| v.to_s.index(parent)}.keys.size
-		      if @arrkeys.to_s.scan(parent).count == looptimes
-			@temp = @temp[0...-1]
-		      end
-		    end
+                    @temp = clean_temp(@temp)
                        
                     return @arrkeys
 
@@ -103,7 +124,7 @@ class Parent
 	def path(json=@json, parent=@parent)
 
 	    pa = find(json,parent)
-            #p pa
+
 	    if pa[0].class == String
                 path = ""
                 if pa.size > 1
@@ -145,8 +166,8 @@ end
 =begin
 require 'json'
 str = ""
-File.open('test.json','r:UTF-8') {|f| str = f.read.gsub('=>',':')}
+File.open('test.json','r:UTF-8') {|f| str = f.read}
 json = JSON.parse(str)
-parent = "normalize-package-data"
+parent = "pinkie-promise"
 p Parent.new(json,parent).find
 =end
