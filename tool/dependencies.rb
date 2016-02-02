@@ -85,6 +85,9 @@ module Dependencies
 	# recursively
 	unless json["dependencies"] == nil
 		json["dependencies"].each do |k,v|
+			# nopt requires only abbrev 1, but abbrev has no 1 version
+			# at all. it starts from 1.0.1. workaround here.
+			v = "1.x" if k == "abbrev" && name == "nopt"
 			self.list(k,v,name)
 		end
 	end
