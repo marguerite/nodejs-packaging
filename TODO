@@ -1,1 +1,2 @@
-* global linking
+* global linking 
+* native-build module if there's .gyp present
