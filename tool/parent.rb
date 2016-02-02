@@ -64,14 +64,32 @@ class Parent
                                 @arrkeys[@i] = []
                                 key.each {|k| @arrkeys[@i] << k}
                                 @i += 1
-				if @temp.size > 1
-                                	@temp = @temp[0...-1]
-				end
                             end
                           end          
                         end
                     end
-                                
+
+		    # temp ['gulp','gulp-util','dateformat','meow']
+		    #[['gulp','gulp-util','dateformat','meow','normalize-package-data']]
+	            # clear temp: if @arrkeys contains parent, and the last loop in temp
+		    # is over. then clear last temp value
+		    if @temp.size > 1 # temp = 1, most of the times don't need to clean
+		      lasttemp = @temp[-1]
+		      str = ""
+		      a = @temp[0...-1]
+		      a.each do |m|
+			if m = a[0]
+				str = "@json[\"#{m}\"][\"dependencies\"]"
+			else
+				str += "[\"dependencies\"][\"#{m}\"]"
+			end
+		      end
+		      looptimes = eval(str).select{|k,v| v.to_s.index(parent)}.keys.size
+		      if @arrkeys.to_s.scan(parent).count == looptimes
+			@temp = @temp[0...-1]
+		      end
+		    end
+                       
                     return @arrkeys
 
                 else
@@ -85,7 +103,7 @@ class Parent
 	def path(json=@json, parent=@parent)
 
 	    pa = find(json,parent)
-            p pa
+            #p pa
 	    if pa[0].class == String
                 path = ""
                 if pa.size > 1
@@ -129,6 +147,6 @@ require 'json'
 str = ""
 File.open('test.json','r:UTF-8') {|f| str = f.read.gsub('=>',':')}
 json = JSON.parse(str)
-parent = "read-pkg"
+parent = "normalize-package-data"
 p Parent.new(json,parent).find
 =end
