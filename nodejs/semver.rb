@@ -45,7 +45,7 @@ module Semver
 
         comparators = range2comp(range)
         dep = {}
-
+	
         comparators.each do |comparator|
 
                 # the leading '=' or 'v' character is stripped
@@ -54,14 +54,18 @@ module Semver
 
                 # deal with prerelease tag, eg '1.2.3-alpha.1', OBS doesn't know '-'
                 comparator = comparator.gsub('-','.') if comparator.index(/-(alpha|beta|rc)/)
-                
+		# 1.0.2-1.2.3
                 # operator, version string, version array
                 op = comparator.gsub(/[0-9].*$/,'')
                 vs = comparator.gsub(op,'') # if comparator = [], meaning no version, then vs is ""
                 va = []
-                
+
                 # autocomplete version array
-                if vs.index(".")
+		# do the most weird case first
+                # dateformat "1.0.2-1.2.3"
+                if vs.index("-")
+		    va = [vs,"0","0"]
+                elsif vs.index(".")
                     #["1","0","7"]
                     vap = vs.split(".")
                     #["1","0"]
@@ -209,12 +213,19 @@ module Semver
                         end
                         
                     else
-                        
+                      if va[0].index('-')
+			if dep.has_key?(name)
+			    dep[name] << ["=#{va[0]}"]
+                        else
+			    dep[name] = ["=#{va[0]}"]
+			end
+                      else
                         if dep.has_key?(name)
                             dep[name] << "=#{va[0]}.#{va[1]}.#{va[2]}"
                         else
                             dep[name] = ["=#{va[0]}.#{va[1]}.#{va[2]}"]
                         end
+                      end
                     end
 		end
 
@@ -225,3 +236,5 @@ module Semver
     end
     
 end
+
+p Semver.parse('dateformat','1.0.2-1.2.3')

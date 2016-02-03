@@ -3,7 +3,9 @@
 module History
 
 	require_relative 'download.rb'
+        require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
 	include Download
+	include Vcmp
 	require 'json'
 
 	def self.all(name="")
@@ -39,9 +41,9 @@ module History
 		# because eg, author jump from 0.6.2 to 1.0.0 suddenly
 			a = history.select do |v|
 				if v.index(/beta|alpha|rc|ga/)
-					v.gsub(/-.*$/,'').to_f - version.to_f > 0
+					Vcmp.comp(v.gsub(/-.*$/,''),'>',version)
 				else
-					v.to_f - version.to_f > 0
+					Vcmp.comp(v,'>',version)
 				end
 			    end
 			if a.empty?

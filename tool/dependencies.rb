@@ -5,8 +5,8 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '../nodejs/semver.rb'
-    require_relative '../nodejs/vcmp.rb'
+    require_relative '/usr/lib/rpm/nodejs/semver.rb'
+    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
     require_relative 'parent.rb'
@@ -22,13 +22,11 @@ module Dependencies
     def self.list(name='',comparator='',parent='')
 
 	comparator = "*" if comparator == nil
-	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
+	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}
 
 	# get latest latest version
 	all = History.all(name)
 	latest = all.last
-
-	#p name,parent,comphash,latest
 
 	# calculate proper version that suits the conditions
 	comphash.reject! do |k,hv|
@@ -56,8 +54,6 @@ module Dependencies
 			end
 		end
 	end
-
-	p version
 
 	# if the resolved version does not exist, use the
 	# most reasonable version
