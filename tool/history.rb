@@ -31,14 +31,24 @@ module History
 
 		history = self.all(name)
 
+		if history.include? version
+			last = history[history.find_index(version) - 1]
+		else
 		# history = ["0.6.2","1.0.0"], version = 0.7.0, condition: <0.7.0 
 		# sometimes the version used to judge doesn't exist in the history.
 		# because eg, author jump from 0.6.2 to 1.0.0 suddenly
-		unless history.include? version
-			a = history.select {|v| v.to_f - version.to_f > 0}
-			last = history[history.find_index(a[0]) -1]
-		else
-			last = history[history.find_index(version) - 1]
+			a = history.select do |v|
+				if v.index(/beta|alpha|rc|ga/)
+					v.gsub(/-.*$/,'').to_f - version.to_f > 0
+				else
+					v.to_f - version.to_f > 0
+				end
+			    end
+			if a.empty?
+				last = history[-1]
+			else
+				last = history[history.find_index(a[0]) - 1]
+			end
 		end
 
 		return last

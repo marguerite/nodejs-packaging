@@ -57,6 +57,8 @@ module Dependencies
 		end
 	end
 
+	p version
+
 	# if the resolved version does not exist, use the
 	# most reasonable version
 	unless all.include?(version)
