@@ -25,7 +25,10 @@ module Dependencies
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}	
 
 	# get latest latest version
-	latest = History.all(name).last
+	all = History.all(name)
+	latest = all.last
+
+	#p name,parent,comphash,latest
 
 	# calculate proper version that suits the conditions
 	comphash.reject! do |k,hv|
@@ -52,6 +55,26 @@ module Dependencies
 				end
 			end
 		end
+	end
+
+	# if the resolved version does not exist, use the
+	# most reasonable version
+	unless all.include?(version)
+		candidates = []
+		vs = version.split(".").delete_if {|v| v == "0"} # usually delete starts from the last
+		all.each do |v|
+			vs1 = v.split(".")
+			if vs.size == 2 # no vs.size == 3, because if that the version exists in all
+				if vs1[0] == vs[0] && vs1[1] == vs[1]
+					candidates << v
+				end
+			elsif vs.size == 1
+				if vs1[0] == vs[0]
+					candidates << v
+				end
+			end
+		end
+		version = candidates[-1]	
 	end
 
 	# find the dependencies
@@ -85,9 +108,6 @@ module Dependencies
 	# recursively
 	unless json["dependencies"] == nil
 		json["dependencies"].each do |k,v|
-			# nopt requires only abbrev 1, but abbrev has no 1 version
-			# at all. it starts from 1.0.1. workaround here.
-			v = "1.x" if k == "abbrev" && name == "nopt"
 			self.list(k,v,name)
 		end
 	end
