@@ -28,14 +28,3 @@ Considering the maintenance also, all current tools lack the function to get all
 
 So I decide to create this brand new tool, with automatic package creation and bundling of modules taken into consideration. 
 
-A perfect usage scenario might be: 
-
-* packager gives an npmjs.org URL
-
-* it automatically creates the package on openSUSE Build Service, with all its dependencies bundled locally inside its own node_modules directory.
-
-* the local dependencies are ignore in rpm Provides, because they can't be used outside anyway.
-
-* the local dependencies are considered for the package itself in rpm Requires. (get stripped, because it's self fulfilled)
-
-* produced a map of dependency hierachy (like npm-shirnkwrap.json). so packagers can split some common dependencies into another bundle to reduce disk usage. 
