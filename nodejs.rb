@@ -12,8 +12,6 @@ end
 buildroot = Dir.glob(topdir + "/BUILDROOT/*")[0]
 sourcedir = topdir + "/SOURCES"
 sitelib = "/usr/lib/node_modules"
-#buildroot = "/home/marguerite/Public/nodejs-packaging/buildroot"
-#sourcedir = "/home/marguerite/Public/nodejs-packaging/build"
 
 def recursive_mkdir(json={},workspace="")
 
@@ -72,7 +70,9 @@ when "--filelist"
     open(sourcedir + "/files.lst","w:UTF-8") do |file|
         Dir.glob(buildroot + "/**/*") do |f|
             if File.directory? f
-                file.write "%dir " + f.gsub(buildroot,'') + "\n"
+		unless f == buildroot + "/usr" || f == buildroot + "/usr/lib" || f == buildroot + sitelib
+                    file.write "%dir " + f.gsub(buildroot,'') + "\n"
+		end
             else
                 file.write f.gsub(buildroot,'') + "\n"
             end
