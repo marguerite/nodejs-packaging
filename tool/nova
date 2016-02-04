@@ -20,7 +20,7 @@ if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|
 		f1.each_line do |l|
-			url = "http://registry.npmjs.org/" + l.strip!.gsub(/-[0-9].*$/,'') + "/-/" + l.strip! + ".tgz"
+			url = "http://registry.npmjs.org/" + l.strip.gsub(/-[0-9].*$/,'') + "/-/" + l.strip + ".tgz"
 			f.write "Source" + i.to_s + ":\t" + url + "\n"
 			i += 1
 		end
@@ -46,13 +46,17 @@ if File.exists?(name + '.lst')
     deltanew = new - cross
 
     deltanew.each do |d|
+      unless d == nil
 	url = "http://registry.npmjs.org/" + d.gsub(/-[0-9].*$/,'') + "/-/" + d + ".tgz"
 	IO.popen("wget --tries=0 #{url}")
+      end
     end
     FileUtils.rm_rf name + '.lst'
 
     deltaold.each do |d|
+      unless d == nil
 	IO.popen("osc delete #{d}.tgz")
+      end
     end
 
 end
