@@ -89,19 +89,31 @@ module Dependencies
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
-		    unless parents.to_s.index(/\"#{name}\"/)
-			eval(path)["dependencies"] = {} if eval(path)["dependencies"] == nil
+		    unless parents.to_s.index(/\"#{name}\"/) # child can't have parent as dependency
+		      if eval(path)["dependencies"] == nil
+			eval(path)["dependencies"] = {}
 			eval(path)["dependencies"][name] = {}
 			eval(path)["dependencies"][name]["version"] = version
+		      else
+			if eval(path)["dependencies"][name] == nil
+				eval(path)["dependencies"][name] = {}
+				eval(path)["dependencies"][name]["version"] = version
+			end
+		      end
 		    end
 		else
 		    path.each do |ph|
-			p parents
-			p name
 		      unless parents.to_s.index(/\"#{name}\"/)
-                        eval(ph)["dependencies"] = {} if eval(ph)["dependencies"] == nil
-                        eval(ph)["dependencies"][name] = {}
-                        eval(ph)["dependencies"][name]["version"] = version
+			if eval(ph)["dependencies"] == nil
+                          eval(ph)["dependencies"] = {}
+                          eval(ph)["dependencies"][name] = {}
+                          eval(ph)["dependencies"][name]["version"] = version
+			else
+			  if eval(ph)["dependencies"][name] == nil
+				eval(ph)["dependencies"][name] = {}
+				eval(ph)["dependencies"][name]["version"] = version
+			  end
+			end
 		      end
 		    end
 		end
@@ -112,9 +124,11 @@ module Dependencies
 
 	# recursively
 	unless json["dependencies"] == nil
+	    unless parents.to_s.index(/\"#{name}\"/) # don't loop the parent in child again
 		json["dependencies"].each do |k,v|
 			self.list(k,v,name)
 		end
+	    end
 	end
 
 	# write downloadable filelist
