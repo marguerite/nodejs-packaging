@@ -20,8 +20,7 @@ if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|
 		f1.each_line do |l|
-			arr = l.strip.split(";")
-			url = "http://registry.npmjs.org/" + arr[0] + "/-/" + arr[1] + ".tgz"
+			url = "http://registry.npmjs.org/" + l.strip!.gsub(/-[0-9].*$/,'') + "/-/" + l.strip! + ".tgz"
 			f.write "Source" + i.to_s + ":\t" + url + "\n"
 			i += 1
 		end

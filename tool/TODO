@@ -1,1 +1,2 @@
 * dependency generator: if the required dependency have different version, do not escape
+* able to use bundle packages as dependencies in tool/nodejs.req
