@@ -166,7 +166,7 @@ module Dependencies
 	open(name + '.lst','w:UTF-8') do |f|
 		@@filelist.each do |k,v|
 			v.each do |i|
-				f.write "#{k};#{k}-#{i}\n"
+				f.write "#{k}-#{i}\n"
 			end
 		end
 	end
