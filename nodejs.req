@@ -110,9 +110,9 @@ selfreq.each do |k,v|
         end
 end
 
-# 5. calculate the minimum node version for compatibility
+# 5. calculate the maximum node version
 
-node,min = [],[]
+node,max = [],[]
 
 reqlist.each do |j|
 
@@ -150,17 +150,17 @@ node.each do |v|
 	va = v.split('.')
 	va.push('0') if va.size < 3 # from now va.size = 3
 	va.each_index {|i| va[i] = va[i].to_i} # value to integer
-	if min.empty?
-		min = va
+	if max.empty?
+		max = va
 	else
 		3.times do |i|
-			if min[i] > va[i]
-				min = va
-			elsif min[i] == va[i]
+			if max[i] < va[i]
+				max = va
+			elsif max[i] == va[i]
 				next
 			end
 		end
 	end		
 end
 
-puts "nodejs(engine) >= #{min[0].to_s}.#{min[1].to_s}.#{min[2].to_s}"
+puts "nodejs(engine) >= #{max[0].to_s}.#{max[1].to_s}.#{max[2].to_s}"
