@@ -5,8 +5,8 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '/usr/lib/rpm/nodejs/semver.rb'
-    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
+    require_relative '../nodejs/semver.rb'
+    require_relative '../nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
     require_relative 'parent.rb'
@@ -85,17 +85,24 @@ module Dependencies
 		@@dependencies[name] = {}
 		@@dependencies[name]["version"] = version
 	else
-		#p @@dependencies,parent
-		ps = Parent.new(@@dependencies,parent).path
-		if ps.class == String
-			eval(ps)["dependencies"] = {} if eval(ps)["dependencies"] == nil
-			eval(ps)["dependencies"][name] = {}
-			eval(ps)["dependencies"][name]["version"] = version
+		p @@dependencies,parent
+		parents = Parent.new(@@dependencies,parent).find
+		path = Parent.new(@@dependencies,parent).path(parents)
+		if path.class == String
+		    unless parents.to_s.index(/\"#{name}\"/)
+			eval(path)["dependencies"] = {} if eval(path)["dependencies"] == nil
+			eval(path)["dependencies"][name] = {}
+			eval(path)["dependencies"][name]["version"] = version
+		    end
 		else
-		    ps.each do |s|
-                        eval(s)["dependencies"] = {} if eval(s)["dependencies"] == nil
-                        eval(s)["dependencies"][name] = {}
-                        eval(s)["dependencies"][name]["version"] = version
+		    path.each do |ph|
+			p parents
+			p name
+		      unless parents.to_s.index(/\"#{name}\"/)
+                        eval(ph)["dependencies"] = {} if eval(ph)["dependencies"] == nil
+                        eval(ph)["dependencies"][name] = {}
+                        eval(ph)["dependencies"][name]["version"] = version
+		      end
 		    end
 		end
 	end

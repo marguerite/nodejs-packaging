@@ -4,7 +4,7 @@ class Parent
             @json = json
             @parent = parent
             @keys,@arrkeys,@temp = [],[],[]
-            @i,@n = 0,0
+            @i = 0
 	end
 
 	
@@ -121,14 +121,11 @@ class Parent
             end
 	end
 
-	def path(json=@json, parent=@parent)
-
-	    pa = find(json,parent)
-
-	    if pa[0].class == String
+	def path(keys=[])
+	    if keys[0].class == String
                 path = ""
-                if pa.size > 1
-                    pa.each do |i|
+                if keys.size > 1
+                    keys.each do |i|
                         if path == ""
                             path = "@@dependencies[\"#{i}\"]"
 			else
@@ -136,11 +133,11 @@ class Parent
 			end
                     end	
                 else
-                    path = "@@dependencies[\"#{pa[0]}\"]"
+                    path = "@@dependencies[\"#{keys[0]}\"]"
                 end
             else
                 path = []
-                pa.each do |i|
+                keys.each do |i|
                     ph = ""
                     if i.size > 1
                         i.each do |j|

@@ -15,7 +15,7 @@ Dependencies.write(name)
 
 # start from 1, 0 will the be 'phantomjs.json'
 i = 1
-#=begin
+=begin
 if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|
@@ -40,4 +40,4 @@ if File.exists?(name + '.lst')
     end
     FileUtils.rm_rf name + '.lst'
 end
-#=end
+=end
