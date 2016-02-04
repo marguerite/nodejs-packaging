@@ -32,7 +32,14 @@ module Semver
                comparators = [">=" + temp[0].strip!,"<" + (temp[1].strip!.to_i + 1).to_s + '.0.0']
             end
         elsif range.index(/\s/)
-            comparators = range.split(/\s/)
+            tmp = range.split(/\s/)
+	    if tmp.include?('>') || tmp.include?('>=') || tmp.include?('<') || tmp.include?('<=')
+		tmp.each_slice(2) do |s|
+		    comparators << s[0] + s[1]
+		end
+	    else
+	        comparators = tmp
+	    end
         else
             comparators = [range]
         end
