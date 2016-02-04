@@ -79,7 +79,6 @@ module Dependencies
         str = ""
 	open(name,'r:UTF-8') {|f| str = f.read}
 	json = JSON.parse(str)["versions"][version]
-	FileUtils.rm_rf name
 
 	if parent.empty?
 		@@dependencies[name] = {}
@@ -185,6 +184,9 @@ module Dependencies
 			end
 		end
 	end
+
+	# clean tmp files
+	@@filelist.keys.each {|k| FileUtils.rm_rf(k) }
 
     end
 
