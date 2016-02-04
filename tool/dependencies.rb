@@ -5,8 +5,8 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '../nodejs/semver.rb'
-    require_relative '../nodejs/vcmp.rb'
+    require_relative '/usr/lib/rpm/nodejs/semver.rb'
+    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
     require_relative 'parent.rb'
@@ -85,7 +85,7 @@ module Dependencies
 		@@dependencies[name] = {}
 		@@dependencies[name]["version"] = version
 	else
-		p @@dependencies,parent
+		#p @@dependencies,parent
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
