@@ -19,6 +19,36 @@ module Dependencies
     @@license = []
     @@number = 0
 
+    def self.notloop(name='',version='',parents=[])
+	#p name,version,parents,@@dependencies
+	if parents.to_s.index("\"#{name}\"")
+		ind = parents.index(name)
+		str = ""
+		if ind == 0
+		    str = "@@dependencies[\"#{parents[0]}\"][\"version\"]"
+		else
+		    for i in 0..ind do
+			if i == 0
+				str = "@@dependencies[\"#{parents[i]}\"][\"dependencies\"]"
+			elsif i == ind
+				str += "[\"#{parents[i]}\"][\"version\"]"
+			else
+				str += "[\"#{parents[i]}\"][\"dependencies\"]"
+			end
+		    end
+		end
+		#p str
+		verold = eval(str)
+		if verold == version
+			return true
+		else
+			return false
+		end
+	else
+		return false
+	end
+    end
+
     def self.list(name='',comparator='',parent='')
 
 	comparator = "*" if comparator == nil
@@ -88,7 +118,7 @@ module Dependencies
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
-		    unless parents.to_s.index(/\"#{name}\"/) # child can't have parent as dependency
+		    unless self.notloop(name,version,parents) # child can't have parent as dependency
 		      if eval(path)["dependencies"] == nil
 			eval(path)["dependencies"] = {}
 			eval(path)["dependencies"][name] = {}
@@ -102,7 +132,7 @@ module Dependencies
 		    end
 		else
 		    path.each do |ph|
-		      unless parents.to_s.index(/\"#{name}\"/)
+		      unless self.notloop(name,version,parents)
 			if eval(ph)["dependencies"] == nil
                           eval(ph)["dependencies"] = {}
                           eval(ph)["dependencies"][name] = {}
@@ -123,7 +153,7 @@ module Dependencies
 
 	# recursively
 	unless json["dependencies"] == nil
-	    unless parents.to_s.index(/\"#{name}\"/) # don't loop the parent in child again
+	    unless self.notloop(name,version,parents) # don't loop the parent in child again
 		json["dependencies"].each do |k,v|
 			self.list(k,v,name)
 		end
