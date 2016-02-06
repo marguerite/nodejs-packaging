@@ -7,12 +7,7 @@ require_relative 'dependencies.rb'
 include Dependencies
 
 name = ARGV[0]
-bundles = []
-unless ARGV[1].index("[")
-	puts "required bundles should be provides in this format: [\"A\",\"B\",\"C\"]"
-else
-	bundles = ARGV[1].to_a
-end
+bundles = ARGV[1].split(',')
 
 # generate dependency map, downloadable filelist, and complete license string
 Dependencies.write(name,bundles)
@@ -21,7 +16,7 @@ Dependencies.write(name,bundles)
 
 # start from 1, 0 will the be 'phantomjs.json'
 i = 1
-#=begin
+=begin
 if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|
@@ -66,4 +61,4 @@ if File.exists?(name + '.lst')
     end
 
 end
-#=end
+=end
