@@ -7,9 +7,15 @@ require_relative 'dependencies.rb'
 include Dependencies
 
 name = ARGV[0]
+bundles = []
+unless ARGV[1].index("[")
+	puts "required bundles should be provides in this format: [\"A\",\"B\",\"C\"]"
+else
+	bundles = ARGV[1].to_a
+end
 
 # generate dependency map, downloadable filelist, and complete license string
-Dependencies.write(name)
+Dependencies.write(name,bundles)
 
 # generate source.txt
 

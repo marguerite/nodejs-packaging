@@ -49,7 +49,7 @@ module Dependencies
 	end
     end
 
-    def self.list(name='',comparator='',parent='')
+    def self.list(name='',comparator='',parent='',bundles=[])
 
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}
@@ -153,7 +153,8 @@ module Dependencies
 
 	# recursively
 	unless json["dependencies"] == nil
-	    unless self.notloop(name,version,parents) # don't loop the parent in child again
+	    # don't loop the parent in child again, bundles
+	    unless self.notloop(name,version,parents) || bundles.include?(name)
 		json["dependencies"].each do |k,v|
 			self.list(k,v,name)
 		end
@@ -185,9 +186,9 @@ module Dependencies
 
     end
 
-    def self.write(name="")
+    def self.write(name="",bundles=[])
 
-	self.list(name)
+	self.list(name,bundles)
 
 	open(name + '.json','w:UTF-8') do |f|
 		f.write JSON.pretty_generate(@@dependencies)
