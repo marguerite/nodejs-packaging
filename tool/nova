@@ -14,9 +14,11 @@ Dependencies.write(name,bundles)
 
 # generate source.txt
 
+=begin
+
 # start from 1, 0 will the be 'phantomjs.json'
 i = 1
-=begin
+
 if File.exists?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|

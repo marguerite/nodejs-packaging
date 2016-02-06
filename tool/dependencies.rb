@@ -5,8 +5,8 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '/usr/lib/rpm/nodejs/semver.rb'
-    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
+    require_relative '../nodejs/semver.rb'
+    require_relative '../nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
     require_relative 'parent.rb'
@@ -153,10 +153,12 @@ module Dependencies
 
 	# recursively
 	unless json["dependencies"] == nil
-	    # don't loop the parent in child again, bundles
+	    # don't loop the parent in child & the dependency provided by bundles
+	    p bundles
+	    p bundles.include?(name),name
 	    unless self.notloop(name,version,parents) || bundles.include?(name)
 		json["dependencies"].each do |k,v|
-			self.list(name:k,comparator:v,parent:name)
+			self.list(name:k,comparator:v,parent:name,bundles:bundles)
 		end
 	    end
 	end
