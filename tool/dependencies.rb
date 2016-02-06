@@ -19,7 +19,7 @@ module Dependencies
     @@license = []
     @@number = 0
 
-    def self.notloop(name='',version='',parents=[])
+    def self.skiploop(name='',version='',parents=[])
 	#p name,version,parents,@@dependencies
 	if parents.to_s.index("\"#{name}\"")
 		ind = parents.index(name)
@@ -49,7 +49,23 @@ module Dependencies
 	end
     end
 
-    def self.list(name:'',comparator:'',parent:'',bundles:[])
+    def self.bundled(name='',version='',bundles={})
+	unless bundles.empty?
+		if bundles.keys.include?(name)
+			if bundles[name] == version
+				return true
+			else
+				return false
+			end
+		else
+			return false
+		end
+	else
+		return false
+	end
+    end
+
+    def self.list(name:'',comparator:'',parent:'',bundles:{})
 
 	comparator = "*" if comparator == nil
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}
@@ -118,7 +134,7 @@ module Dependencies
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
-		    unless self.notloop(name,version,parents) # child can't have parent as dependency
+		    unless self.skiploop(name,version,parents) # child can't have parent as dependency
 		      if eval(path)["dependencies"] == nil
 			eval(path)["dependencies"] = {}
 			eval(path)["dependencies"][name] = {}
@@ -132,7 +148,7 @@ module Dependencies
 		    end
 		else
 		    path.each do |ph|
-		      unless self.notloop(name,version,parents)
+		      unless self.skiploop(name,version,parents)
 			if eval(ph)["dependencies"] == nil
                           eval(ph)["dependencies"] = {}
                           eval(ph)["dependencies"][name] = {}
@@ -154,9 +170,7 @@ module Dependencies
 	# recursively
 	unless json["dependencies"] == nil
 	    # don't loop the parent in child & the dependency provided by bundles
-	    p bundles
-	    p bundles.include?(name),name
-	    unless self.notloop(name,version,parents) || bundles.include?(name)
+	    unless self.skiploop(name,version,parents) || self.bundled(name,version,bundles)
 		json["dependencies"].each do |k,v|
 			self.list(name:k,comparator:v,parent:name,bundles:bundles)
 		end
@@ -188,7 +202,7 @@ module Dependencies
 
     end
 
-    def self.write(name="",bundles=[])
+    def self.write(name="",bundles={})
 
 	self.list(name:name,bundles:bundles)
 

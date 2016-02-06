@@ -7,7 +7,13 @@ require_relative 'dependencies.rb'
 include Dependencies
 
 name = ARGV[0]
-bundles = ARGV[1].split(',')
+bundles = {}
+if ARGV[1]
+	ARGV[1].split(',').each do |i|
+		a = i.split(':')
+		bundles[a[0]] = a[1]
+	end
+end
 
 # generate dependency map, downloadable filelist, and complete license string
 Dependencies.write(name,bundles)
