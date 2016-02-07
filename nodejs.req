@@ -4,18 +4,14 @@ require 'rubygems'
 require 'json'
 require_relative 'nodejs/semver.rb'
 require_relative 'nodejs/vcmp.rb'
+require_relative 'nodejs/bundles.rb'
 include Semver
 include Vcmp
+include Bundles
 
 reqlist,provlist = [],[]
 selfreq,selfprov = {},{}
-
-if File.directory?("/usr/src/packages") & File.writable?("/usr/src/packages")
-        topdir = "/usr/src/packages"
-else
-        topdir = ENV["HOME"] + "/rpmbuild"
-end
-buildroot = topdir + "/BUILDROOT"
+buildroot = Bundles.getbuildroot
 
 #ARGF.each do |f| 
 # unknown problem: the later nested each
@@ -35,9 +31,8 @@ end
 # 1. parse the reqlist
 
 reqlist.each do |f|
-        str = ""
-        File.open(f,'r:UTF-8') {|f| str = f.read}
-        js = JSON.parse(str)
+    	js = {}
+        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
         
         unless js["dependencies"] == nil
             js["dependencies"].each do |k,v|
@@ -61,9 +56,8 @@ selfreq.each {|k,v| selfreq[k] = (v.uniq! if v.uniq!) || v}
 
 unless provlist.empty?
     provlist.each do |f|
-        str = ""
-        File.open(f,'r:UTF-8') {|f| str = f.read}
-        js = JSON.parse(str)
+        js = {}
+        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
      
         if selfprov.key?(js["name"])
             selfprov[js["name"]] << js["version"]
@@ -117,8 +111,7 @@ node,max = [],[]
 reqlist.each do |j|
 
 	File.open(j,'r:UTF-8') do |f|
-		str = f.read
-		json = JSON.parse str
+		json = JSON.parse(f.read)
 		if json["engines"]
 		     if json["engines"].class == String
 			m = json["engines"].gsub(/[0-9].*/,'')

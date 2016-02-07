@@ -2,6 +2,8 @@
 
 require 'rubygems'
 require 'json'
+require 'nodejs/bundles.rb'
+include Bundles
 
 pub,priv,provides = [],[],[]
 internal = {}
@@ -21,9 +23,8 @@ end
 
 pub.each do |f|
 
-	str = ""
-	File.open(f,'r:UTF-8') {|f| str = f.read}
-	js = JSON.parse(str)
+	js = {}
+	File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
 
 	provides << "npm(" + js["name"] + ") = " + js["version"]
 
@@ -31,9 +32,8 @@ end
 
 unless priv.empty?
     priv.each do |f|
-        str = ""
-        File.open(f,'r:UTF-8') {|f| str = f.read}
-        js = JSON.parse(str)
+        js = {}
+        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
 
         if internal.key?(js["name"].to_sym)
             internal[js["name"].to_sym] << js["version"]

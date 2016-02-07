@@ -1,13 +1,11 @@
 #!/usr/bin/env ruby
 
+require 'rubygems'
 require 'json'
+require 'nodejs/bundles.rb'
+include Bundles
 
-if File.directory?("/usr/src/packages") & File.writable?("/usr/src/packages")
-        topdir = "/usr/src/packages"
-else
-        topdir = ENV["HOME"] + "/rpmbuild"
-end
-buildroot = Dir.glob(topdir + "/BUILDROOT/*")[0]
+buildroot = Bundles.getbuildroot
 
 ## all directories
 
@@ -19,7 +17,7 @@ end
 pkgname = ARGV[0]
 dep = ARGV[1]
 pkgjson = ""
-jsstr = ""
+json = {}
 
 files.each do |f|
 	pkgjson = f if f.index(pkgname + "/package.json")
@@ -28,8 +26,7 @@ end
 # get its parent
 pkgjson = pkgjson.gsub('node_modules/' + pkgname + '/package.json','') + "package.json"
 
-File.open(pkgjson,'r:UTF-8') {|f| jsstr = f.read}
-json = JSON.parse(jsstr)
+File.open(pkgjson,'r:UTF-8') {|f| json = JSON.parse(f.read)}
 
 json["dependencies"][pkgname] = dep
 

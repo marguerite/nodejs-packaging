@@ -2,16 +2,12 @@
 
 require 'json'
 require 'fileutils'
+require_relative 'nodejs/bundles.rb'
+include Bundles
 
-
-if File.directory?("/usr/src/packages") & File.writable?("/usr/src/packages")
-        topdir = "/usr/src/packages"
-else
-        topdir = ENV["HOME"] + "/rpmbuild"
-end
-buildroot = Dir.glob(topdir + "/BUILDROOT/*")[0]
-sourcedir = topdir + "/SOURCES"
-sitelib = "/usr/lib/node_modules"
+buildroot = Bundles.getbuildroot
+sourcedir = Bundles.getsourcedir
+sitelib = Bundles.getsitelib
 
 def recursive_mkdir(json={},workspace="")
 
