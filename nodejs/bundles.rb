@@ -3,7 +3,7 @@ module Bundles
 	require 'rubygems'
 	require 'json'
 	require_relative 'vcmp.rb'
-	include VCMP
+	include Vcmp
 
 	if File.directory?("/usr/src/packages") & File.writable?("/usr/src/packages")
         	topdir = "/usr/src/packages"
@@ -29,7 +29,7 @@ module Bundles
 	def findreq
 
 		req = {}
-		spec = Dir.glob("./*.spec")[0]
+		spec = Dir.glob(@@sourcedir + "/*.spec")[0]
 		open(spec) do |f|
 			f.each_line do |l|
 				# Requires:\tnpm(gulp-util) = 3.0.7
@@ -49,16 +49,15 @@ module Bundles
 	end
 
 	def findpkgjson(req={})
-		req = Bundles.findbundlereq if req.empty?
+		req = Bundles.findreq if req.empty?
 		pkgjson = []
 		req.each do |k,v|
-			Dir.glob(buildroot + sitelib + "/**/" + k + "/package.json") do |f|
+			Dir.glob(@@sourcedir + "/" + k + "*" + "/package.json") do |f|
 				json = {}
 				open(f) {|f1| json = JSON.parse(f1.read)}
 				unless v == nil
-					# ">= 3.0.7"
 					va = v.split("\s")
-					if VCMP.comp(json["version"],va[0],va[1])
+					if Vcmp.comp(json["version"],va[0],va[1])
 						pkgjson << f
 					end					
 				else
@@ -70,6 +69,7 @@ module Bundles
 	end
 
 	def getrequires(pkgjson=[])
+		pkgjson = Bundles.findpkgjson if pkgjson.empty?
 		requires = {}
 		pkgjson.each do |f|
 			json = {}
@@ -79,7 +79,7 @@ module Bundles
 				    if requires[k]
 					requires[k] << v
 				    else
-					requires[k] = v
+					requires[k] = [v]
 				    end
 				end
 			end

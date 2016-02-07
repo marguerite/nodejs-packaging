@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'json'
-require 'nodejs/bundles.rb'
+require_relative 'nodejs/bundles.rb'
 include Bundles
 
 pub,priv,provides = [],[],[]

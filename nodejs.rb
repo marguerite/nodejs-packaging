@@ -39,11 +39,10 @@ when "--prep"
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
 when "--mkdir"
-    str = ''
+    json = {}
     Dir.glob(sourcedir + "/*.json") do |j|
-	open(j,'r:UTF-8') {|f| str = f.read}
+	open(j,'r:UTF-8') {|f| json = JSON.parse(f.read)}
     end
-    json = JSON.parse(str)
     recursive_mkdir(json,buildroot + sitelib)
 when "--copy"
     Dir.glob(buildroot + "/**/*") do |dir|
