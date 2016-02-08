@@ -9,13 +9,34 @@ buildroot = Bundles.getbuildroot
 sourcedir = Bundles.getsourcedir
 sitelib = Bundles.getsitelib
 
+def has_bundle(key="",version="")
+
+    bundles = Bundles.findreq #{"gulp-util"=>"3.0.7}
+    if bundles.keys.include?(key)
+      if bundles[key] == nil
+	return true
+      else
+	if bundles[key] == version
+		return true
+	else
+		return false
+	end
+      end
+    else
+	return false
+    end
+
+end
+
 def recursive_mkdir(json={},workspace="")
 
     json.keys.each do |key|
         version = json[key]["version"]
 	dest = workspace + "/" + key + "-" + version
 	puts "Creating #{dest}"
-	FileUtils.mkdir_p dest
+	unless has_bundle(key,version)
+	  FileUtils.mkdir_p dest
+        end
 	unless json[key] == nil
 		if json[key].keys.include?("dependencies")
 			version = json[key]["version"]
