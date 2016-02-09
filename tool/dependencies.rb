@@ -5,8 +5,8 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '/usr/lib/rpm/nodejs/semver.rb'
-    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
+    require_relative '../nodejs/semver.rb'
+    require_relative '../nodejs/vcmp.rb'
     require_relative 'history.rb'
     require_relative 'download.rb'
     require_relative 'parent.rb'
@@ -20,7 +20,6 @@ module Dependencies
     @@number = 0
 
     def self.skiploop(name='',version='',parents=[])
-	#p name,version,parents,@@dependencies
 	if parents.to_s.index("\"#{name}\"")
 		ind = parents.index(name)
 		str = ""
@@ -37,7 +36,6 @@ module Dependencies
 			end
 		    end
 		end
-		#p str
 		verold = eval(str)
 		if verold == version
 			return true
@@ -130,7 +128,6 @@ module Dependencies
 		@@dependencies[name] = {}
 		@@dependencies[name]["version"] = version
 	else
-		#p @@dependencies,parent
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String

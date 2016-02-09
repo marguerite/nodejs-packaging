@@ -160,11 +160,10 @@ class Parent
         
 end
 
-=begin
+#=begin
 require 'json'
-str = ""
-File.open('test.json','r:UTF-8') {|f| str = f.read}
-json = JSON.parse(str)
-parent = "pinkie-promise"
+json = {}
+File.open('test.json','r:UTF-8') {|f| json = JSON.parse(f.read)}
+parent = "glob"
 p Parent.new(json,parent).find
-=end
+#=end

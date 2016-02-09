@@ -3,7 +3,7 @@
 module History
 
 	require_relative 'download.rb'
-        require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
+        require_relative '../nodejs/vcmp.rb'
 	include Download
 	include Vcmp
 	require 'json'
