@@ -89,7 +89,7 @@ class Parent
                             key << k
                                     
                             unless k == parent
-                                if v["dependencies"].to_s.scan(parent).count == 1
+                                if v["dependencies"].to_s.scan("\"#{parent}\"").count == 1
                                     find_single(v["dependencies"],parent)
                                     @keys.each {|k| key << k}
                                     @keys = []
@@ -160,10 +160,10 @@ class Parent
         
 end
 
-#=begin
+=begin
 require 'json'
 json = {}
 File.open('test.json','r:UTF-8') {|f| json = JSON.parse(f.read)}
 parent = "glob"
 p Parent.new(json,parent).find
-#=end
+=end
