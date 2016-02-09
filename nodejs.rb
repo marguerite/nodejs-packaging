@@ -3,7 +3,9 @@
 require 'json'
 require 'fileutils'
 require_relative 'nodejs/bundles.rb'
+require_relative 'nodejs/vcmp.rb'
 include Bundles
+include Vcmp
 
 buildroot = Bundles.getbuildroot
 sourcedir = Bundles.getsourcedir
@@ -11,12 +13,13 @@ sitelib = Bundles.getsitelib
 
 def has_bundle(key="",version="")
 
-    bundles = Bundles.findreq #{"gulp-util"=>"3.0.7}
+    bundles = Bundles.findreq #{"gulp-util"=>"= 3.0.7}
     if bundles.keys.include?(key)
       if bundles[key] == nil
 	return true
       else
-	if bundles[key] == version
+	va = bundles[key].split(/\s/)
+	if Vcmp.comp(version,va[0],va[1])
 		return true
 	else
 		return false
@@ -34,6 +37,8 @@ def recursive_mkdir(json={},workspace="")
         version = json[key]["version"]
 	dest = workspace + "/" + key + "-" + version
 	puts "Creating #{dest}"
+	p key,version
+	p has_bundle(key,version)
 	unless has_bundle(key,version)
 	  FileUtils.mkdir_p dest
         end
