@@ -8,7 +8,32 @@ module History
 	include Vcmp
 	require 'json'
 
-	def self.all(name="")
+	def sort(versions=[])
+		va,result = [],[]
+		# strip beta versions
+		versions.reject! {|v| v.index("-")}
+		versions.each do |v|
+			a = v.split(".")
+			b = [] 
+			a.each {|v| b << v.to_i}
+			va << b	
+		end
+		va = va.sort!
+		va.each do |v|
+			vs = ""
+			v.each_with_index do |k,i|
+				unless i == v.size - 1
+					vs += k.to_s + "."
+				else
+					vs += k.to_s
+				end
+			end
+			result << vs
+		end
+		return result
+	end
+
+	def all(name="")
 
 		url = "http://registry.npmjs.org/" + name
 		str = ""
@@ -25,13 +50,13 @@ module History
 		history = []
 		histhash.keys.each {|k| history << k}
 
-		return history.sort! # the result is not natively sorted.
+		return sort(history) # the result is not natively sorted.
 
 	end
 
-	def self.last(name="",version="")
+	def last(name="",version="")
 
-		history = self.all(name)
+		history = all(name)
 
 		if history.include? version
 			last = history[history.find_index(version) - 1]
@@ -56,6 +81,8 @@ module History
 		return last
 
 	end
+
+	module_function :sort,:all,:last
 
 end
 
