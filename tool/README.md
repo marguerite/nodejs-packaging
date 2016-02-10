@@ -1,10 +1,10 @@
-## Nova, the ultimate nodejs packaging toolkit like a supernova!
+## Npkg, the ultimate nodejs packaging toolkit
 
 It's so stupid that everyone can package nodejs modules for openSUSE!
 
-* copy `/usr/share/nova/template` to your package's namespace as <packagename>.spec
+* copy `/usr/share/npkg/template` to your package's namespace as <packagename>.spec
 * finish the specfile
-* run `nova <module>` inside the package's namespace, it will generate:
+* run `npkg <module>` inside the package's namespace, it will generate:
 * A `<name>.license`, use it to replace the specfile's License tag.
 * A `<name>.source`, use it to replace the specfile's Source tag.
 * all the dependencies downloaded in current directory. `osc add *.tgz` will add them all!

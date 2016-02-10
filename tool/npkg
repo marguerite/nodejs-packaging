@@ -20,7 +20,7 @@ Dependencies.write(name,bundles)
 
 # generate source.txt
 
-#=begin
+=begin
 
 # start from 1, 0 will the be 'phantomjs.json'
 i = 1
@@ -69,4 +69,4 @@ if File.exists?(name + '.lst')
     end
 
 end
-#=end
+=end
