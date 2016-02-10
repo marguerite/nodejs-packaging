@@ -25,7 +25,7 @@ module History
 		history = []
 		histhash.keys.each {|k| history << k}
 
-		return history
+		return history.sort! # the result is not natively sorted.
 
 	end
 
