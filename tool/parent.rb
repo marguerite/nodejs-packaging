@@ -67,7 +67,7 @@ class Parent
                     end    
                 end
             end
-            #p temp - newtemp
+
             return (temp - newtemp)
         end
 
@@ -83,7 +83,7 @@ class Parent
                         find(json.values[0]["dependencies"],parent)
                     else
                         json.each do |k,v|
-                          if k == parent || v.to_s.index(parent)
+                          if k == parent || v.to_s.index("\"#{parent}\"")
                             key = []
                             @temp.each {|j| key << j}
                             key << k
@@ -164,6 +164,6 @@ end
 require 'json'
 json = {}
 File.open('test.json','r:UTF-8') {|f| json = JSON.parse(f.read)}
-parent = "glob"
+parent = "xtend"
 p Parent.new(json,parent).find
 =end
