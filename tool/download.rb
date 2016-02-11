@@ -22,8 +22,8 @@ module Download
 					end
 				end
 			end
-		rescue Exception => e
-			puts "=> Exception: '#{e}'. Skipping download."
+		rescue => e
+			raise "=> Exception: '#{e}'. Skipping download."
 		end
 
 		return file

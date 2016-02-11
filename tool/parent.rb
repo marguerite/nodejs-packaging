@@ -34,7 +34,7 @@ class Parent
         def get_str(temp=[])
             str = ""
             temp.each do |t|
-                if t = temp[0]
+                if t == temp[0]
                     str = "@json[\"#{t}\"][\"dependencies\"]"
                 else
                     str += "[\"#{t}\"][\"dependencies\"]"

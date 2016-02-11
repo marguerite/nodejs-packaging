@@ -16,15 +16,15 @@ locallib = buildroot + sitelib + '/' + pkgname + '/node_modules'
 
 open(buildroot + sitelib + '/' + pkgname + "/package.json",'r:UTF-8') {|f| json = JSON.parse(f.read)}
 
-if File.exists?(locallib)
+if File.exist?(locallib)
 	raise "node_modules exists for #{pkgname}. it's a bundled package that symlinks are handled differently".
 else
 	Dir.mkdir(locallib)
 end
 
 json["dependencies"].each do |d|
-	if File.exists?(sitelib + '/' + d)
-	    unless File.exists?(locallib + '/' + d)
+	if File.exist?(sitelib + '/' + d)
+	    unless File.exist?(locallib + '/' + d)
 		FileUtils.ln_sf(sitelib + '/' + d, locallib + '/' + d)
 	    end
 	end

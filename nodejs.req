@@ -83,7 +83,7 @@ selfreq.keys.each do |req| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
 			op = j.gsub(/[0-9].*$/,'')
 			ve = j.gsub(op,'')
 			Vcmp.comp(i,op,ve)
-		    }
+		}
 	    end
 
 	end
@@ -92,7 +92,7 @@ selfreq.keys.each do |req| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
 
 end
 
-selfreq.reject! { |k,v| v.empty? }
+selfreq.reject! { |_k,v| v.empty? }
 
 # 4. print the real reqs
 
@@ -156,4 +156,4 @@ node.each do |v|
 	end		
 end
 
-puts "nodejs(engine) >= #{max[0].to_s}.#{max[1].to_s}.#{max[2].to_s}"
+puts "nodejs(engine) >= #{max[0]}.#{max[1]}.#{max[2]}"

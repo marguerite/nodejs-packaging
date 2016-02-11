@@ -197,18 +197,18 @@ module Semver
                         
                         if dep.has_key?(name)
                             dep[name] << ">=#{va[0]}.0.0"
-                            dep[name] << "<#{(va[0].to_i + 1).to_s}.0.0"
+                            dep[name] << "<#{(va[0].to_i + 1)}.0.0"
                         else
-                            dep[name] = [">=#{va[0]}.0.0","<#{(va[0].to_i + 1).to_s}.0.0"]
+                            dep[name] = [">=#{va[0]}.0.0","<#{(va[0].to_i + 1)}.0.0"]
                         end
                         
                     elsif va[2].index(/x|X/)
                         
                         if dep.has_key?(name)
                             dep[name] << ">=#{va[0]}.#{va[1]}.0"
-                            dep[name] << "<#{va[0]}.#{(va[1].to_i + 1).to_s}.0"
+                            dep[name] << "<#{va[0]}.#{(va[1].to_i + 1)}.0"
                         else
-                            dep[name] = [">=#{va[0]}.#{va[1]}.0","<#{va[0]}.#{(va[1].to_i + 1).to_s}.0"]
+                            dep[name] = [">=#{va[0]}.#{va[1]}.0","<#{va[0]}.#{(va[1].to_i + 1)}.0"]
                         end    
                             
                     elsif va == ["0","0","0"]
@@ -236,7 +236,7 @@ module Semver
                     end
 		end
 
-            end
+        end
 
         return dep
 

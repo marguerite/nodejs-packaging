@@ -39,13 +39,13 @@ module History
 		str = ""
 		file = Download.get(url)
 
-		if File.exists?(file)
+		if File.exist?(file)
 			File.open(file,'r:UTF-8') {|f| str = f.read}
 		end
 
 		json = JSON.parse(str)
 
-		histhash = json["time"].reject! {|k,v| k == "modified" || k == "created"}
+		histhash = json["time"].reject! {|k,_v| k == "modified" || k == "created"}
 
 		history = []
 		histhash.keys.each {|k| history << k}
@@ -70,7 +70,7 @@ module History
 				else
 					Vcmp.comp(v,'>',version)
 				end
-			    end
+			end
 			if a.empty?
 				last = history[-1]
 			else

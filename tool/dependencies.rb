@@ -73,7 +73,7 @@ module Dependencies
 	latest = all.last
 
 	# calculate proper version that suits the conditions
-	comphash.reject! do |k,hv|
+	comphash.reject! do |_k,hv|
 		hv.reject! do |v|
 			op = v.gsub(/[0-9].*$/,'')
 			ve = v.gsub(op,'')
@@ -194,7 +194,7 @@ module Dependencies
 		end
 	end
 
-	@@filelist.each {|k,v| v = (v.uniq! if v.uniq!)||v}
+	@@filelist.values.each {|v| v = (v.uniq! if v.uniq!)||v}
 	@@license = (@@license.uniq! if @@license.uniq!)||@@license
 
     end
