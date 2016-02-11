@@ -24,7 +24,7 @@ end
 pub.each do |f|
 
 	js = {}
-	File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
+	File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
 
 	provides << "npm(" + js["name"] + ") = " + js["version"]
 
@@ -33,7 +33,7 @@ end
 unless priv.empty?
     priv.each do |f|
         js = {}
-        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
+        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
 
         if internal.key?(js["name"].to_sym)
             internal[js["name"].to_sym] << js["version"]

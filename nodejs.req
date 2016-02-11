@@ -32,7 +32,7 @@ end
 
 reqlist.each do |f|
     	js = {}
-        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
+        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
         
         unless js["dependencies"] == nil
             js["dependencies"].each do |k,v|
@@ -57,7 +57,7 @@ selfreq.each {|k,v| selfreq[k] = (v.uniq! if v.uniq!) || v}
 unless provlist.empty?
     provlist.each do |f|
         js = {}
-        File.open(f,'r:UTF-8') {|f| js = JSON.parse(f.read)}
+        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
      
         if selfprov.key?(js["name"])
             selfprov[js["name"]] << js["version"]

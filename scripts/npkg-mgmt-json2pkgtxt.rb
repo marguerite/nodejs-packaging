@@ -2,13 +2,11 @@
 
 require 'json'
 
-str = ""
+json = {}
 
 Dir.glob('./*.json') do |f|
-	open(f) {|f1| str = f1.read }
+	open(f) {|f1| json = JSON.parse(f1.read) }
 end
-
-json = JSON.parse(str)
 
 $keys = []
 
@@ -41,6 +39,8 @@ $pkgs = $pkgs.sort!
 
 $result = $keys & $pkgs
 
-open('packages.txt','w:UTF-8') do |f|
-	$result.each {|k| f.write k + "\n"}
+unless $result.empty?
+	open('packages.txt','w:UTF-8') do |f|
+		$result.each {|k| f.write k + "\n"}
+	end
 end
