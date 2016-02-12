@@ -46,19 +46,19 @@ module History
 	def all(name="")
 
 		url = "http://registry.npmjs.org/" + name
-		str = ""
 		file = Download.get(url)
+		json,history = {},[]
 
 		if File.exist?(file)
-			File.open(file,'r:UTF-8') {|f| str = f.read}
+			File.open(file,'r:UTF-8') {|f| json = JSON.parse(f.read)}
 		end
 
-		json = JSON.parse(str)
-
 		histhash = json["time"].reject! {|k,_v| k == "modified" || k == "created"}
-
-		history = []
-		histhash.keys.each {|k| history << k}
+		histhash.keys.each do |k|
+			unless json["versions"][k].nil? # "graceful-fs@2.1.0" doesn't exist
+				history << k
+			end
+		end
 
 		return sort(history) # the result is not natively sorted.
 
