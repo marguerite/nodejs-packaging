@@ -15,7 +15,7 @@ module History
 		versions.each do |v|
 			a = v.split(".")
 			b = [] 
-			a.each {|v| b << v.to_i}
+			a.each {|v1| b << v1.to_i}
 			va << b	
 		end
 		va = va.sort!

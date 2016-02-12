@@ -4,18 +4,15 @@ require 'rubygems'
 require 'json'
 require '/usr/lib/rpm/nodejs/semver.rb'
 require '/usr/lib/rpm/nodejs/vcmp.rb'
-require '/usr/lib/rpm/nodejs/bundles.rb'
 include Semver
 include Vcmp
-include Bundles
 
 reqlist,provlist = [],[]
 selfreq,selfprov = {},{}
-buildroot = Bundles.getbuildroot
 
 ARGF.each do |f| 
   if f.strip.end_with?("package.json")
-  	unless f.index(/\/test\//)
+	unless f.index(/\/test\//)
     		reqlist << f.strip
     
     		if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
@@ -118,13 +115,13 @@ reqlist.each do |j|
 				node << v
 			end
 		     else
-			json["engines"].each do |k,v|
-				unless k != "node" || v == nil || v == "*" # "*" means >= 0.0.0
-					m = v.gsub(/[0-9].*/,'')
-					v = v.gsub(m,'') # remove the ">=", always be
-					v = v.gsub(/x|X/,'0') # replace 0.1.x with 0.1.0
-					unless node.include?(v)
-						node << v
+			json["engines"].each do |k,v1|
+				unless k != "node" || v1 == nil || v1 == "*" # "*" means >= 0.0.0
+					m = v1.gsub(/[0-9].*/,'')
+					v1 = v1.gsub(m,'') # remove the ">=", always be
+					v1 = v1.gsub(/x|X/,'0') # replace 0.1.x with 0.1.0
+					unless node.include?(v1)
+						node << v1
 					end
 				end
 			end

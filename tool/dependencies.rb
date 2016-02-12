@@ -192,7 +192,7 @@ module Dependencies
 		json["licenses"].each do |h|
 			@@license << h["type"]
 		end
-	end
+        end
 
 	@@filelist.values.each {|v| v = (v.uniq! if v.uniq!)||v}
 	@@license = (@@license.uniq! if @@license.uniq!)||@@license

@@ -25,7 +25,7 @@ Dependencies.write(name,bundles)
 # start from 1, 0 will the be 'phantomjs.json'
 i = 1
 
-if File.exists?(name + '.lst')
+if File.exist?(name + '.lst')
     open(name + '.source','w:UTF-8') do |f|
 	open(name + '.lst','r:UTF-8') do |f1|
 		f1.each_line do |l|
@@ -38,7 +38,7 @@ if File.exists?(name + '.lst')
 end
 
 # delta download sources
-if File.exists?(name + '.lst')
+if File.exist?(name + '.lst')
     old,new = [],[]
     Dir.glob("./**/*.tgz") do |f|
 	old << f.gsub("./","").gsub(".tgz","")

@@ -36,7 +36,7 @@ def recursive_mkdir(json={},workspace="")
     json.keys.each do |key|
         version = json[key]["version"]
 	dest = workspace + "/" + key + "-" + version
-	unless has_bundle(key,version)
+        unless has_bundle(key,version)
 	  puts "Creating #{dest}"
 	  FileUtils.mkdir_p dest
         end

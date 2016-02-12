@@ -91,10 +91,10 @@ class Parent
                             unless k == parent
                                 if v["dependencies"].to_s.scan("\"#{parent}\"").count == 1
                                     find_single(v["dependencies"],parent)
-                                    @keys.each {|k| key << k}
+                                    @keys.each {|k1| key << k1}
                                     @keys = []
                                     @arrkeys[@i] = []
-                                    key.each {|k| @arrkeys[@i] << k}
+                                    key.each {|k1| @arrkeys[@i] << k1}
                                     @i += 1
                                 else
                                     @temp << k
@@ -102,7 +102,7 @@ class Parent
                                 end
                             else
                                 @arrkeys[@i] = []
-                                key.each {|k| @arrkeys[@i] << k}
+                                key.each {|k1| @arrkeys[@i] << k1}
                                 @i += 1
                             end
                           end          
@@ -122,7 +122,7 @@ class Parent
 	end
 
 	def path(keys=[])
-	    if keys[0].class == String
+            if keys[0].class == String
                 path = ""
                 if keys.size > 1
                     keys.each do |i|
@@ -130,7 +130,7 @@ class Parent
                             path = "@@dependencies[\"#{i}\"]"
 			else
                             path += "[\"dependencies\"][\"#{i}\"]"
-			end
+                        end
                     end	
                 else
                     path = "@@dependencies[\"#{keys[0]}\"]"
