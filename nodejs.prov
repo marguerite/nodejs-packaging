@@ -2,7 +2,7 @@
 
 require 'rubygems'
 require 'json'
-require_relative 'nodejs/bundles.rb'
+require '/usr/lib/rpm/nodejs/bundles.rb'
 include Bundles
 
 pub,priv,provides = [],[],[]
@@ -10,7 +10,10 @@ internal = {}
 
 ARGF.each do |f|
 
-	# escape local dependencies in package's node_modules
+    # support RPM < 4.9.1
+    if f.end_with?("package.json")
+
+	# local dependencies has at least two node_modules
 	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
 		pub << f.strip!
 	else
@@ -18,6 +21,8 @@ ARGF.each do |f|
 			priv << f.strip!
 		end
 	end
+
+    end
 
 end
 

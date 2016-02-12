@@ -1,5 +1,4 @@
 require 'json'
-str = ''
-open('test.json') {|f| str = f.read.gsub("=>",":") }
-json = JSON.parse(str)
+json = {}
+open('test.json') {|f| json = JSON.parse(f.read.gsub("=>",":")) }
 open('test.json','w:UTF-8') {|f| f.write JSON.pretty_generate(json)}

@@ -18,11 +18,13 @@
 
 # no-op macro to allow spec compatibility with EPEL
 %nodejs_find_provides_and_requires \
-%if 0%{?suse_version} == 1110 \
+%if 0%{?suse_version} <= 1110 \
 %global _use_internal_dependency_generator 0 \
 %global __find_provides %{_prefix}/lib/rpm/nodejs.prov \
 %global __find_requires %{_prefix}/lib/rpm/nodejs.req \
 %nodejs_default_filter \
+%else \
+%nil \
 %endif
 
 %nodejs_prep %{_prefix}/lib/rpm/nodejs.rb --prep

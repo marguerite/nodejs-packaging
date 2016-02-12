@@ -2,8 +2,8 @@
 
 require 'json'
 require 'fileutils'
-require_relative 'nodejs/bundles.rb'
-require_relative 'nodejs/vcmp.rb'
+require '/usr/lib/rpm/nodejs/bundles.rb'
+require '/usr/lib/rpm/nodejs/vcmp.rb'
 include Bundles
 include Vcmp
 

@@ -3,7 +3,7 @@
 require 'rubygems'
 require 'json'
 require 'fileutils'
-require_relative 'nodejs/bundles.rb'
+require '/usr/lib/rpm/nodejs/bundles.rb'
 include Bundles
 
 buildroot = Bundles.getbuildroot

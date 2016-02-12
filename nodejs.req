@@ -2,9 +2,9 @@
 
 require 'rubygems'
 require 'json'
-require_relative 'nodejs/semver.rb'
-require_relative 'nodejs/vcmp.rb'
-require_relative 'nodejs/bundles.rb'
+require '/usr/lib/rpm/nodejs/semver.rb'
+require '/usr/lib/rpm/nodejs/vcmp.rb'
+require '/usr/lib/rpm/nodejs/bundles.rb'
 include Semver
 include Vcmp
 include Bundles

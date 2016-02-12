@@ -2,8 +2,8 @@
 # return a module's last version
 module History
 
-	require_relative 'download.rb'
-        require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
+	require '/usr/share/npkg/download.rb'
+        require '/usr/lib/rpm/nodejs/vcmp.rb'
 	include Download
 	include Vcmp
 	require 'json'

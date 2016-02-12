@@ -5,11 +5,11 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
-    require_relative '/usr/lib/rpm/nodejs/semver.rb'
-    require_relative '/usr/lib/rpm/nodejs/vcmp.rb'
-    require_relative 'history.rb'
-    require_relative 'download.rb'
-    require_relative 'parent.rb'
+    require '/usr/lib/rpm/nodejs/semver.rb'
+    require '/usr/lib/rpm/nodejs/vcmp.rb'
+    require '/usr/share/npkg/history.rb'
+    require '/usr/share/npkg/download.rb'
+    require '/usr/share/npkg/parent.rb'
     include Semver    
     include Vcmp
     include History
