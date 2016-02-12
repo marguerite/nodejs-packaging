@@ -30,6 +30,7 @@ module Vcmp
 			expr = fi[i].to_i - se[i].to_i
 			if expr > 0
 				result = 1
+				break
 			elsif expr == 0
 				if i == 3
 					result = 0
@@ -38,6 +39,7 @@ module Vcmp
 				end
 			else
 				result = -1
+				break
 			end
 		end
 		return result

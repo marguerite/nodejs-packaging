@@ -13,29 +13,34 @@ module History
 	include Vcmp
 	require 'json'
 
-	def sort(versions=[])
-		va,result = [],[]
-                # strip beta versions
-                versions.reject! {|v| v.index("-")}
-		versions.each do |v|
-			a = v.split(".")
-			b = [] 
-			a.each {|v1| b << v1.to_i}
-			va << b	
-		end
-		va = va.sort!
-		va.each do |v|
-			vs = ""
-			v.each_with_index do |k,i|
-				unless i == v.size - 1
-					vs += k.to_s + "."
-				else
-					vs += k.to_s
-				end
-			end
-			result << vs
-		end
-		return result
+	def sort(arr=[],size=0,changed=0)
+		# bundle sort
+        	i,j = 0,changed
+        	size = arr.size if size == 0
+        	while i < size - 1 do
+                	if Vcmp.comp(arr[i],">",arr[i+1])
+                        	m = arr[i]
+                        	n = arr[i+1]
+                        	arr.map! do |a|
+                            		if a == m
+                                		n
+                            		elsif a == n
+                                		m
+                            		else
+                                		a
+                            		end
+                        	end
+                        	changed += 1
+                	end
+                	i += 1
+        	end
+
+        	unless size == 1 || j == changed
+                	sort(arr,size - 1,changed)
+        	end
+
+        	return arr
+
 	end
 
 	def all(name="")
