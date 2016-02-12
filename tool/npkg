@@ -3,7 +3,12 @@
 # The ultimate awesome Nodejs packaging tool like a supernova!
 
 require 'fileutils'
+#=begin
 require '/usr/share/npkg/dependencies.rb'
+#=end
+=begin
+require_relative 'dependencies.rb'
+=end
 include Dependencies
 
 name = ARGV[0]

@@ -5,11 +5,20 @@ module Dependencies
 
     require 'json'
     require 'fileutils'
+#=begin
     require '/usr/lib/rpm/nodejs/semver.rb'
     require '/usr/lib/rpm/nodejs/vcmp.rb'
     require '/usr/share/npkg/history.rb'
     require '/usr/share/npkg/download.rb'
     require '/usr/share/npkg/parent.rb'
+#=end
+=begin
+    require_relative '../nodejs/semver.rb'
+    require_relative '../nodejs/vcmp.rb'
+    require_relative 'history.rb'
+    require_relative 'download.rb'
+    require_relative 'parent.rb'
+=end
     include Semver    
     include Vcmp
     include History
@@ -65,7 +74,7 @@ module Dependencies
 
     def self.list(name:'',comparator:'',parent:'',bundles:{})
 
-	comparator = "*" if comparator == nil
+	comparator = "*" if comparator.nil?
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}
 
 	# get latest latest version
@@ -120,9 +129,8 @@ module Dependencies
 	end
 
 	# find the dependencies
-        str = ""
-	open(name,'r:UTF-8') {|f| str = f.read}
-	json = JSON.parse(str)["versions"][version]
+        json = {}
+	open(name,'r:UTF-8') {|f| json = JSON.parse(f.read)["versions"][version]}
 
 	if parent.empty?
 		@@dependencies[name] = {}
@@ -132,12 +140,12 @@ module Dependencies
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
 		    unless self.skiploop(name,version,parents) # child can't have parent as dependency
-		      if eval(path)["dependencies"] == nil
+		      if eval(path)["dependencies"].nil?
 			eval(path)["dependencies"] = {}
 			eval(path)["dependencies"][name] = {}
 			eval(path)["dependencies"][name]["version"] = version
 		      else
-			if eval(path)["dependencies"][name] == nil
+			if eval(path)["dependencies"][name].nil?
 				eval(path)["dependencies"][name] = {}
 				eval(path)["dependencies"][name]["version"] = version
 			end
@@ -146,12 +154,12 @@ module Dependencies
 		else
 		    path.each do |ph|
 		      unless self.skiploop(name,version,parents)
-			if eval(ph)["dependencies"] == nil
+			if eval(ph)["dependencies"].nil?
                           eval(ph)["dependencies"] = {}
                           eval(ph)["dependencies"][name] = {}
                           eval(ph)["dependencies"][name]["version"] = version
 			else
-			  if eval(ph)["dependencies"][name] == nil
+			  if eval(ph)["dependencies"][name].nil?
 				eval(ph)["dependencies"][name] = {}
 				eval(ph)["dependencies"][name]["version"] = version
 			  end
@@ -165,7 +173,7 @@ module Dependencies
         puts "#{@@number}:#{name}"
 
 	# recursively
-	unless json["dependencies"] == nil
+	unless json["dependencies"].nil?
 	    # don't loop the parent in child & the dependency provided by bundles
 	    unless self.skiploop(name,version,parents) || self.bundled(name,version,bundles)
 		json["dependencies"].each do |k,v|
@@ -182,13 +190,13 @@ module Dependencies
 	end
 
 	# write licenses
-        if json["license"] != nil
+        if ! json["license"].nil?
 	    if json["license"].class == Hash
 		@@license << json["license"]["type"]
 	    else
 		@@license << json["license"]
 	    end
-	elsif json["licenses"] != nil
+	elsif ! json["licenses"].nil?
 		json["licenses"].each do |h|
 			@@license << h["type"]
 		end

@@ -1,17 +1,22 @@
 # return a module's version history
 # return a module's last version
 module History
-
+#=begin
 	require '/usr/share/npkg/download.rb'
         require '/usr/lib/rpm/nodejs/vcmp.rb'
+#=end
+=begin
+	require_relative 'download.rb'
+	require_relative '../nodejs/vcmp.rb'
+=end
 	include Download
 	include Vcmp
 	require 'json'
 
 	def sort(versions=[])
 		va,result = [],[]
-		# strip beta versions
-		versions.reject! {|v| v.index("-")}
+                # strip beta versions
+                versions.reject! {|v| v.index("-")}
 		versions.each do |v|
 			a = v.split(".")
 			b = [] 
