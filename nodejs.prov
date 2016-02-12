@@ -11,14 +11,14 @@ internal = {}
 ARGF.each do |f|
 
     # support RPM < 4.9.1
-    if f.end_with?("package.json")
+    if f.strip.end_with?("package.json")
 
 	# local dependencies has at least two node_modules
 	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-		pub << f.strip!
+		pub << f.strip
 	else
 		unless f.index(/\/(test|example.*)\//)
-			priv << f.strip!
+			priv << f.strip
 		end
 	end
 

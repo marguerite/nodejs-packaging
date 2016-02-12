@@ -13,19 +13,16 @@ reqlist,provlist = [],[]
 selfreq,selfprov = {},{}
 buildroot = Bundles.getbuildroot
 
-#ARGF.each do |f| 
-# unknown problem: the later nested each
-# in #3 step won't run completely ( 19 times vs. 14000+ times)
-Dir.glob(buildroot + "/**/package.json") do |f|
-#  f = f.strip!
-  unless f.index(/\/test\//)
-    reqlist << f
+ARGF.each do |f| 
+  if f.strip.end_with?("package.json")
+  	unless f.index(/\/test\//)
+    		reqlist << f.strip
     
-    if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-        provlist << f
-    end
-  end
-
+    		if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
+        		provlist << f.strip
+    		end
+	end
+  end 
 end
 
 # 1. parse the reqlist
