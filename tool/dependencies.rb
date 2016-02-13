@@ -29,7 +29,9 @@ module Dependencies
     @@number = 0
     
     def skip(name='',version='',array=[])
-        
+       
+	if array.include?(name)
+ 
         ind = 0
                 
         # find from last
@@ -60,6 +62,11 @@ module Dependencies
         else
             return 0
         end
+
+	else
+
+		return -1
+	end
         
     end
 
@@ -74,16 +81,10 @@ module Dependencies
                     return false
                 end
 
-            else # [["d", "es5-ext", "es6-iterator", "d"],["d", "es5-ext", "es6-iterator", "d"]]
+            else
                 arr = []
-                parents.each do |pa|
-                    if skip(name,version,pa) > 0
-                        arr << 1
-                    else
-                        arr << 0
-                    end
-                end
-                
+                parents.each {|pa| arr << skip(name,version,pa)}
+
                 if arr.include?(0)
                     return false
                 else
