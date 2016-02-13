@@ -60,7 +60,7 @@ if File.exist?(name + '.lst')
     deltanew = new - cross
 
     deltanew.each do |d|
-      unless d == nil
+      unless d.nil?
 	url = "http://registry.npmjs.org/" + d.gsub(/-[0-9].*$/,'') + "/-/" + d + ".tgz"
 	IO.popen("wget --tries=0 #{url}")
       end
@@ -68,7 +68,7 @@ if File.exist?(name + '.lst')
     FileUtils.rm_rf name + '.lst'
 
     deltaold.each do |d|
-      unless d == nil
+      unless d.nil?
 	IO.popen("osc delete #{d}.tgz")
       end
     end

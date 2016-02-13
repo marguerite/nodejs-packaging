@@ -27,36 +27,77 @@ module Dependencies
     @@filelist,@@dependencies = {},{}
     @@license = []
     @@number = 0
+    
+    def skip(name='',version='',array=[])
+        
+        ind = 0
+                
+        # find from last
+        array.to_enum.with_index.reverse_each do |k,i|
+            if k == name
+                ind = i
+                break
+            end
+        end
+                
+        str = ""
+        if ind == 0
+            str = "@@dependencies[\"#{array[0]}\"][\"version\"]"
+        else
+            for i in 0..ind do
+                if i == 0
+                    str = "@@dependencies[\"#{array[i]}\"][\"dependencies\"]"
+                elsif i == ind
+                    str += "[\"#{array[i]}\"][\"version\"]"
+                else
+                    str += "[\"#{array[i]}\"][\"dependencies\"]"
+                end
+            end
+        end
+        verold = eval(str)
+        if verold == version
+            return 1
+        else
+            return 0
+        end
+        
+    end
 
-    def self.skiploop(name='',version='',parents=[])
-	if parents.to_s.index("\"#{name}\"")
-		ind = parents.index(name)
-		str = ""
-		if ind == 0
-		    str = "@@dependencies[\"#{parents[0]}\"][\"version\"]"
-		else
-		    for i in 0..ind do
-			if i == 0
-				str = "@@dependencies[\"#{parents[i]}\"][\"dependencies\"]"
-			elsif i == ind
-				str += "[\"#{parents[i]}\"][\"version\"]"
-			else
-				str += "[\"#{parents[i]}\"][\"dependencies\"]"
-			end
-		    end
-		end
-		verold = eval(str)
-		if verold == version
-			return true
-		else
-			return false
-		end
+    def skiploop(name='',version='',parents=[])
+	if ( ! parents.nil? ) && parents.to_s.index("\"#{name}\"")
+
+            if parents[0].class == String
+                
+                if skip(name,version,parents) > 0
+                    return true
+                else
+                    return false
+                end
+
+            else # [["d", "es5-ext", "es6-iterator", "d"],["d", "es5-ext", "es6-iterator", "d"]]
+                arr = []
+                parents.each do |pa|
+                    if skip(name,version,pa) > 0
+                        arr << 1
+                    else
+                        arr << 0
+                    end
+                end
+                
+                if arr.include?(0)
+                    return false
+                else
+                    return true
+                end
+                
+            end
+                
 	else
 		return false
 	end
     end
 
-    def self.bundled(name='',version='',bundles={})
+    def bundled(name='',version='',bundles={})
 	unless bundles.empty?
 		if bundles.keys.include?(name)
 			if bundles[name] == version
@@ -72,7 +113,7 @@ module Dependencies
 	end
     end
 
-    def self.list(name:'',comparator:'',parent:'',bundles:{})
+    def list(name:'',comparator:'',parent:'',bundles:{})
 
 	comparator = "*" if comparator.nil?
 	comphash = Semver.parse(name,comparator) # {'clone':['>=1.0.2','<1.1.0']}
@@ -139,7 +180,7 @@ module Dependencies
 		parents = Parent.new(@@dependencies,parent).find
 		path = Parent.new(@@dependencies,parent).path(parents)
 		if path.class == String
-		    unless self.skiploop(name,version,parents) # child can't have parent as dependency
+		    unless skiploop(name,version,parents) # child can't have parent as dependency
 		      if eval(path)["dependencies"].nil?
 			eval(path)["dependencies"] = {}
 			eval(path)["dependencies"][name] = {}
@@ -153,7 +194,7 @@ module Dependencies
 		    end
 		else
 		    path.each do |ph|
-		      unless self.skiploop(name,version,parents)
+		      unless skiploop(name,version,parents)
 			if eval(ph)["dependencies"].nil?
                           eval(ph)["dependencies"] = {}
                           eval(ph)["dependencies"][name] = {}
@@ -175,9 +216,9 @@ module Dependencies
 	# recursively
 	unless json["dependencies"].nil?
 	    # don't loop the parent in child & the dependency provided by bundles
-	    unless self.skiploop(name,version,parents) || self.bundled(name,version,bundles)
+	    unless skiploop(name,version,parents) || bundled(name,version,bundles)
 		json["dependencies"].each do |k,v|
-			self.list(name:k,comparator:v,parent:name,bundles:bundles)
+			list(name:k,comparator:v,parent:name,bundles:bundles)
 		end
 	    end
 	end
@@ -207,9 +248,9 @@ module Dependencies
 
     end
 
-    def self.write(name="",bundles={})
+    def write(name="",bundles={})
 
-	self.list(name:name,bundles:bundles)
+	list(name:name,bundles:bundles)
 
 	open(name + '.json','w:UTF-8') do |f|
 		f.write JSON.pretty_generate(@@dependencies)
@@ -241,6 +282,11 @@ module Dependencies
 	@@filelist.keys.each {|k| FileUtils.rm_rf(k) }
 
     end
+    
+    module_function :skip,:skiploop
+    module_function :bundled
+    module_function :list
+    module_function :write
 
 end
 

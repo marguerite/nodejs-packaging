@@ -16,7 +16,7 @@ class Parent
                     find(json.values[0]["dependencies"],parent)
                 else
                     json.keys.each do |k|
-                        unless json[k]["dependencies"] == nil
+                        unless json[k]["dependencies"].nil?
                             if json[k]["dependencies"].to_s.index('"' + parent + '"')
                                 @keys << k
                                 self.find(json[k]["dependencies"],parent)
@@ -46,20 +46,18 @@ class Parent
         
         def clean_temp(temp=@temp)
             
-            newtemp = [temp[-1]]
+            newtemp,result = [temp[-1]],[]
            
             if temp.size > 1 # temp = 1, most of the times don't need to clean
                 last = get_str(temp)
                 looptimes = eval(last).select{|k,v| v.to_s.index(@parent) || k == @parent}.keys.size
-
                 if @arrkeys.to_s.scan(@parent).count == looptimes
                     temp.each_index do |i|
                         n = temp.size - i - 1 # 5 - i
-                        #["gulp","gulp-utils","dateformat","meow","read-pkg-up","find-up"]
                         str = get_str(temp[0...n])
                         s = eval(str).select{|k,v| k != temp[n+1] && ( v.to_s.index(@parent) || k == @parent)}
                         newtemp << temp[n]
-                        if s != nil && s.keys.size >= 1
+                        if ! s.nil? && s.keys.size >= 1
                             break
                         else
                             next
@@ -68,12 +66,22 @@ class Parent
                 end
             end
 
-            return (temp - newtemp)
+            # delete from the last of temp
+            temp.to_enum.with_index.reverse_each do |k,i|
+
+                if newtemp.include?(k)
+                    temp.each_with_index {|m,j| result << m unless j == i}
+                    newtemp.delete_if {|n| n == k}
+                end
+
+            end
+            
+            return result
         end
 
 	def find(json=@json,parent=@parent)
             
-            unless json == nil
+            unless json.nil?
                 
                 count = json.to_s.scan("\"#{parent}\"").count
                 if count > 1
@@ -81,6 +89,10 @@ class Parent
                     if json.keys.size == 1
                         @temp << json.keys[0]
                         find(json.values[0]["dependencies"],parent)
+                        unless @keys.empty?
+                           @temp.each {|t| @arrkeys << t}
+                           @keys.each {|k| @arrkeys << k}
+                        end
                     else
                         json.each do |k,v|
                           if k == parent || v.to_s.index("\"#{parent}\"")

@@ -4,7 +4,7 @@ module Download
 
 	require 'net/http'
 
-	def self.get(url='')
+	def get(url='')
 
 		path = url.gsub(/^.*\.(com|org)/,'')
 		file = url.gsub(/^.*\//,'')
@@ -29,6 +29,8 @@ module Download
 		return file
 
 	end
+
+	module_function :get
 
 end
 
