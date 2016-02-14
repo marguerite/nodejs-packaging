@@ -50,7 +50,7 @@ DESCRIPTION
 # make your changes here, suppose:
 # %{buildroot}%{nodejs_sitelib}/%{name} exists
 # you can copy, modify stuff, like:
-# ln -s %{nodejs_sitelib}/gulp/bin/gulp \
+# ln -sf %{nodejs_sitelib}/gulp/bin/gulp \
 # %{buildroot}%{_bindir}/gulp
 # but your changes won't be tracked by files.lst
 # so write them manually

@@ -190,7 +190,7 @@ module Vcmp
                         elsif min_result < 0
                                 return false
                         else
-                                return false
+                                return true
                         end
                    else
                         return true
@@ -217,3 +217,4 @@ module Vcmp
 
 end
 
+p Vcmp.comp("2.0.1",">=","2.0.1")
