@@ -78,7 +78,7 @@ when "--copy"
     Dir.glob(buildroot + "/**/*").sort{|x| x.size}.each do |dir|
         name = dir.gsub(/^.*\//,'')
 	prefix = dir.gsub(buildroot,'').gsub(name,'')
-        if name.index(/[0-9]\.[0-9]/)
+        if name.index(/-[0-9]\.[0-9]/)
                 FileUtils.mv dir,buildroot + prefix + name.gsub(/-[0-9].*$/,'')
         end
 	if name.index(/test|example|benchmark/)
