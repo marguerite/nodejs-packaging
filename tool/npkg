@@ -4,12 +4,12 @@
 
 require 'fileutils'
 #=begin
-require '/usr/share/npkg/dependencies.rb'
+require '/usr/share/npkg/dependency.rb'
 #=end
 =begin
-require_relative 'dependencies.rb'
+require_relative 'dependency.rb'
 =end
-include Dependencies
+include Dependency
 
 name = ARGV[0]
 bundles = {}
@@ -21,7 +21,7 @@ if ARGV[1]
 end
 
 # generate dependency map, downloadable filelist, and complete license string
-Dependencies.write(name,bundles)
+Dependency.write(name,bundles)
 
 # generate source.txt
 

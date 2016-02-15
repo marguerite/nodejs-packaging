@@ -1,4 +1,4 @@
-module Dependencies
+module Dependency
 
     # takes a module name, write all its dependent modules
     # and downloadable files in pretty json
@@ -235,13 +235,23 @@ module Dependencies
         if ! json["license"].nil?
 	    if json["license"].class == Hash
 		@@license << json["license"]["type"]
+	    elsif json["license"].class == Array
+		json["license"].each {|h| @@license << h}
 	    else
 		@@license << json["license"]
 	    end
 	elsif ! json["licenses"].nil?
+	    if json["licenses"].class == Array
 		json["licenses"].each do |h|
+		    if h.class == String
+			@@license << h
+		    else
 			@@license << h["type"]
+		    end
 		end
+	    else # Hash
+		@@license << json["licenses"]["type"]
+	    end
         end
 
 	@@filelist.values.each {|v| v = (v.uniq! if v.uniq!)||v}
