@@ -10,8 +10,11 @@ module Vcmp
 		    maj,min = [],[]
 		    a = str.split("-") # ["1.0.0","beta.2"]
 		    maj = a[0].split(".") # ["1","0","0"]
-		    if a[1].index(".")
+		    if a[1].index(".") # beta.2
 		    	min = a[1].split(".") # ["beta","2"]
+		    elsif a[1].index(/[a-z][0-9]/) # beta2
+			b = a[1].gsub(/[0-9].*$/,'')
+			min = [b,a[1].gsub(b,'')]
 		    else
 			min = [a[1]] #["beta"]
 		    end
@@ -217,4 +220,4 @@ module Vcmp
 
 end
 
-p Vcmp.comp("2.0.1",">=","2.0.1")
+#p Vcmp.comp("0.4.10-rc5",">=","0.4.10-rc4")
