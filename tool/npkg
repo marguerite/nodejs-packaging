@@ -24,6 +24,7 @@ if ARGV[1]
 end
 
 # generate dependency map, downloadable filelist, and complete license string
+puts "Processing dependencies in package.json"
 Dependency.write(name,bundles)
 
 # generate source.txt
@@ -80,8 +81,11 @@ if File.exist?(name + '.lst')
 end
 
 # bower
-IO.popen("tar -xf #{name}-*.tgz")
+io = IO.popen("tar -xf #{name}-*.tgz")
+io.close
 if File.exist? "package/bower.json"
-	Bower.download(name)
+	puts "Processing dependencies in bower.json"
+	Bower.install(name)
 end
+FileUtils.rm_rf "package"
 #=end

@@ -42,15 +42,15 @@ module Bower
 				FileUtils.rm_f file
 				url = j["url"].gsub("git://","https://").gsub(".git","")
 				html = Nokogiri::HTML(open(url + "/tags"))
-				versions,matches = [],[]
-				html.xpath('//span[@class="tag-name"]').each {|f| versions << f.text
+				versions_pre,versions,matches = [],[],[]
+				html.xpath('//span[@class="tag-name"]').each {|f| versions_pre << f.text
 }
 				# remove the prefix "v" in eg v3.0.0
-				versions.map! do |v1|
+				versions_pre.each do |v1|
 					if v1.index(/^v/)
-						v1.gsub("v","")
+						versions << v1.gsub("v","")
 					else
-						v1
+						versions << v1
 					end
 				end
 
@@ -72,7 +72,15 @@ module Bower
 				end
 
 				match = matches[0]
-				url = url + "/archives/v" + match + "/" + k + "-" + match + ".tar.gz"
+
+				versions_pre.each do |v1|
+					if v1.index(match)
+						match = v1
+						break
+					end
+				end
+
+				url = url + "/archive/" + match + ".tar.gz"
 
 			end
 			jsonnew[k] = url
@@ -88,7 +96,8 @@ module Bower
 		json.each do |k,v|
 			io = IO.popen("mkdir -p bower_components/#{k}")
 			io.close
-			Download.get(v)
+			io1 = IO.popen("wget #{v}")
+			io1.close
 			tarball = v.gsub(/^.*\//,'')
 			if File.exist? tarball
 				FileUtils.mv tarball,"bower_components/#{k}/"
@@ -96,7 +105,9 @@ module Bower
 		end
 
 		if File.exist? "bower_components"
-			IO.popen("tar -czf bower_components.tar.gz bower_components")
+			io = IO.popen("tar -czf bower_components.tar.gz bower_components")
+			io.close
+			FileUtils.rm_rf "bower_components"
 		end
 
 	end

@@ -62,6 +62,15 @@ when "--prep"
         io.close
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
+    # bower
+    if File.exist? sourcedir + "/bower_components.tar.gz"
+	io = IO.popen("tar -xf #{sourcedir}/bower_components.tar.gz -C #{sourcedir}")
+	io.close
+	Dir.glob(sourcedir + "/bower_components") do |dir|
+		io1 = IO.popen("tar -xf #{dir}/*.tar.gz -C #{dir}")
+		io1.close
+	end
+    end
 when "--mkdir"
     json = {}
     Dir.glob(sourcedir + "/*.json") do |j|
