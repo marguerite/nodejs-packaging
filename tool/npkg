@@ -5,11 +5,14 @@
 require 'fileutils'
 #=begin
 require '/usr/share/npkg/dependency.rb'
+require '/usr/share/npkg/plugins/bower.rb'
 #=end
 =begin
 require_relative 'dependency.rb'
+require_relative 'plugins/bower.rb'
 =end
 include Dependency
+include Bower
 
 name = ARGV[0]
 bundles = {}
@@ -62,16 +65,23 @@ if File.exist?(name + '.lst')
     deltanew.each do |d|
       unless d.nil?
 	url = "http://registry.npmjs.org/" + d.gsub(/-[0-9].*$/,'') + "/-/" + d + ".tgz"
-	IO.popen("wget --tries=0 #{url}")
+	io = IO.popen("wget --tries=0 #{url}")
+	io.close
       end
     end
     FileUtils.rm_rf name + '.lst'
 
     deltaold.each do |d|
       unless d.nil?
-	IO.popen("osc delete #{d}.tgz")
+	p "#{d}.tgz needs to be deleted from source"
       end
     end
 
+end
+
+# bower
+IO.popen("tar -xf #{name}-*.tgz")
+if File.exist? "package/bower.json"
+	Bower.download(name)
 end
 #=end

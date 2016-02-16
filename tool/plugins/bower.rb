@@ -4,10 +4,18 @@ module Bower
 	require 'fileutils'
 	require 'nokogiri'
 	require 'open-uri'
+#=begin
+	require '/usr/share/npkg/download.rb'
+	require '/usr/share/npkg/history.rb'
+	require '/usr/lib/rpm/nodejs/semver.rb'
+	require '/usr/lib/rpm/nodejs/vcmp.rb'
+#=end
+=begin
 	require_relative "../download.rb"
 	require_relative "../history.rb"
 	require_relative "../../nodejs/semver.rb"
 	require_relative "../../nodejs/vcmp.rb"
+=end
 	include Semver
 	include Vcmp
 	include Download
@@ -97,4 +105,3 @@ module Bower
 
 end
 
-p Bower.install("tryton-sao")
