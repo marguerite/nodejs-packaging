@@ -54,6 +54,33 @@ def recursive_mkdir(json={},workspace="")
 
 end
 
+def backpath(path="",count="")
+
+        count.times do
+
+                path = path.gsub(/\/$/,'')
+                path = path.gsub(path.gsub(/^.*\//,''),'')
+                unless count == 1
+                        backpath(path,count - 1)
+                end
+
+        end
+
+        return path
+
+end
+
+def find_symlink(symlink="",target="")
+
+        path = symlink.gsub(symlink.gsub(/^.*\//,''),'')
+        count = target.scan("..").count
+        back = backpath(path,count)
+        suffix = target.gsub(/^.*\.\.\//,'')
+        realpath = back + suffix
+
+        return realpath
+end
+
 case ARGV[0]
 when "--prep"
     Dir.glob(sourcedir + "/*.tgz") do |tgz|
@@ -63,13 +90,22 @@ when "--prep"
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
     # bower
-    if File.exist? sourcedir + "/bower_components.tar.gz"
+    if File.exist?(sourcedir + "/bower_components.tar.gz")
 	io = IO.popen("tar -xf #{sourcedir}/bower_components.tar.gz -C #{sourcedir}")
 	io.close
-	Dir.glob(sourcedir + "/bower_components") do |dir|
-		io1 = IO.popen("tar -xf #{dir}/*.tar.gz -C #{dir}")
-		io1.close
+
+    	Dir.glob(sourcedir + "/bower_components/**/*.tar.gz") do |dir|
+		dir1 = dir.gsub(dir.gsub(/^.*\//,''),'')
+        	io1 = IO.popen("tar -xf #{dir} -C #{dir1}")
+        	io1.close
+		FileUtils.rm_rf dir
+        	Dir.glob(dir1 + "/*") do |i|
+        		io2 = IO.popen("cp -r #{i}/* #{dir1}/")
+        		io2.close
+			FileUtils.rm_rf i
+        	end
 	end
+
     end
 when "--mkdir"
     json = {}
@@ -94,14 +130,43 @@ when "--copy"
 		FileUtils.rm_rf dir
 	end
     end
+    # bower
+    main = Dir.glob(buildroot + sitelib + "/*")[0]
+    if Dir.exist?(sourcedir + "/bower_components")
+        Dir.glob(sourcedir + "/bower_components/**/*") do |f|
+                if File.directory?(f)
+                        FileUtils.mkdir_p f.gsub(sourcedir,main)
+                end
+        end
+
+        Dir.glob(sourcedir + "/bower_components/**/*").sort{|x| x.size}.each do |f|
+		if File.symlink?(f)
+			real_target = find_symlink(f,File.readlink(f))
+			if File.directory? real_target
+				FileUtils.mkdir_p real_target.gsub(sourcedir,main)
+				Dir.glob(real_target + "/**/*") do |i|
+				    name = i.gsub(real_target,'')
+				    FileUtils.ln_sf i.gsub(sourcedir,main).gsub(buildroot,''),f.gsub(sourcedir,main) + name
+				end
+			else
+				FileUtils.ln_sf real_target.gsub(sourcedir,main).gsub(buildroot,''),f.gsub(sourcedir,main)
+			end
+		end
+		unless File.directory?(f) || File.symlink?(f)
+			file = f.gsub(sourcedir + "/bower_components",'')
+			dir = f.gsub(file,'').gsub(sourcedir,main)
+			FileUtils.cp_r f,dir + file
+		end
+	end  
+    end
 when "--filelist"
     open(sourcedir + "/files.lst","w:UTF-8") do |file|
         Dir.glob(buildroot + "/**/*") do |f|
             if File.directory? f
 		unless f == buildroot + "/usr" || f == buildroot + "/usr/lib" || f == buildroot + sitelib
                     file.write "%dir " + f.gsub(buildroot,'') + "\n"
-		end
-            else
+		end	
+	    else
                 file.write f.gsub(buildroot,'') + "\n"
             end
         end
