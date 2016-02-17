@@ -152,7 +152,7 @@ when "--copy"
 				FileUtils.ln_sf real_target.gsub(sourcedir,main).gsub(buildroot,''),f.gsub(sourcedir,main)
 			end
 		end
-		unless File.directory?(f) || File.symlink?(f)
+		unless File.directory?(f) || File.symlink?(f) || f.end_with?("package.json") || f.end_with?("bower.json")
 			file = f.gsub(sourcedir + "/bower_components",'')
 			dir = f.gsub(file,'').gsub(sourcedir,main)
 			FileUtils.cp_r f,dir + file
