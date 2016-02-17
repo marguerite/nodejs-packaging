@@ -211,10 +211,9 @@ module Semver
                             dep[name] = [">=#{va[0]}.#{va[1]}.0","<#{va[0]}.#{(va[1].to_i + 1)}.0"]
                         end    
                             
-                    elsif va == ["0","0","0"]
-                        
+                    elsif va == ["0","0","0"]        
                         if dep.has_key?(name)
-                            dep[name] << [">=0.0.0"]
+                            dep[name] << ">=0.0.0"
                         else
                             dep[name] = [">=0.0.0"]
                         end
