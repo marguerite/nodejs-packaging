@@ -89,6 +89,7 @@ when "--prep"
         io.close
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
+    
     # bower
     if File.exist?(sourcedir + "/bower_components.tar.gz")
 	io = IO.popen("tar -xf #{sourcedir}/bower_components.tar.gz -C #{sourcedir}")
@@ -107,12 +108,42 @@ when "--prep"
 	end
 
     end
+    
 when "--mkdir"
     json = {}
+    
     Dir.glob(sourcedir + "/*.json") do |j|
 	open(j,'r:UTF-8') {|f| json = JSON.parse(f.read)}
     end
+    
     recursive_mkdir(json,buildroot + sitelib)
+    
+when "--build"
+    buildlist = []
+    
+    Dir.glob(sourcedir + "/**/*") do |f|
+        if f.end_with?(".c") || f.end_with?(".h")
+            name = f.gsub(/^.*node_modules\//,'').gsub(/\/.*$/,'')
+            prefix = f.gsub(buildroot,'').gsub(/#{name}\/.*$/,'')
+            prefix = buildroot + prefix + name
+            buildlist << prefix
+        end
+    end
+    
+    buildlist = ( buildlist.uniq! if buildlist.uniq! ) || buildlist
+    
+    buildlist.each do |b|
+        io = IO.popen("pushd #{b} && npm build -f && popd")
+        io.close
+    end
+    # clean source/middle files
+    Dir.glob(sourcedir + "/**/*") do |f| 
+        FileUtils.rm_rf f if f.end_with?(".c") || f.end_with?(".h")
+        FileUtils.rm_rf f if f.index(/build\/(Release|Debug)/,'')
+    end
+    # clean empty directories
+    Dir[sourcedir + "/**/*"].select{|d| File.directory? d}.select{|d| (Dir.entries(d) - %w[ . .. ]).empty?}.each{|d| Dir.rmdir d}
+    
 when "--copy"
     Dir.glob(buildroot + "/**/*") do |dir|
 	name = dir.gsub(/^.*\//,'')
@@ -120,6 +151,7 @@ when "--copy"
 		FileUtils.cp_r f,dir
 	end
     end
+    
     Dir.glob(buildroot + "/**/*").sort{|x| x.size}.each do |dir|
         name = dir.gsub(/^.*\//,'')
 	prefix = dir.gsub(buildroot,'').gsub(name,'')
@@ -130,6 +162,7 @@ when "--copy"
 		FileUtils.rm_rf dir
 	end
     end
+    
     # bower
     main = Dir.glob(buildroot + sitelib + "/*")[0]
     if Dir.exist?(sourcedir + "/bower_components")
@@ -159,7 +192,9 @@ when "--copy"
 		end
 	end  
     end
+    
 when "--filelist"
+    
     open(sourcedir + "/files.lst","w:UTF-8") do |file|
         Dir.glob(buildroot + "/**/*") do |f|
             if File.directory? f
@@ -171,5 +206,6 @@ when "--filelist"
             end
         end
     end
+    
 end
 

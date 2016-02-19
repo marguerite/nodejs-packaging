@@ -29,6 +29,7 @@
 
 %nodejs_prep %{_prefix}/lib/rpm/nodejs.rb --prep
 %nodejs_mkdir %{_prefix}/lib/rpm/nodejs.rb --mkdir
+%nodejs_build %{_prefix}/lib/rpm/nodejs.rb --build
 %nodejs_copy %{_prefix}/lib/rpm/nodejs.rb --copy
 %nodejs_filelist %{_prefix}/lib/rpm/nodejs.rb --filelist
 
