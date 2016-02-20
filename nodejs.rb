@@ -122,7 +122,7 @@ when "--build"
     buildlist = []
     
     Dir.glob(sourcedir + "/**/*") do |f|
-        if f.end_with?(".c") || f.end_with?(".h")
+        if f.end_with?(/\.c|\.h|\.cc|\.cpp/)
             name = f.gsub(/^.*node_modules\//,'').gsub(/\/.*$/,'')
             prefix = f.gsub(buildroot,'').gsub(/#{name}\/.*$/,'')
             prefix = buildroot + prefix + name
@@ -138,8 +138,8 @@ when "--build"
     end
     # clean source/middle files
     Dir.glob(sourcedir + "/**/*") do |f| 
-        FileUtils.rm_rf f if f.end_with?(".c") || f.end_with?(".h")
-        FileUtils.rm_rf f if f.index(/build\/(Release|Debug)/,'')
+        FileUtils.rm_rf f if f.end_with?(/\.c|\.h|\.cc|\.cpp/)
+        FileUtils.rm_rf f if f.index(/build\/(Release|Debug)/)
     end
     # clean empty directories
     Dir[sourcedir + "/**/*"].select{|d| File.directory? d}.select{|d| (Dir.entries(d) - %w[ . .. ]).empty?}.each{|d| Dir.rmdir d}
@@ -192,7 +192,14 @@ when "--copy"
 		end
 	end  
     end
-    
+
+when "--clean"
+
+    open(buildroot + "/**/*") do |f|
+
+
+    end
+ 
 when "--filelist"
     
     open(sourcedir + "/files.lst","w:UTF-8") do |file|

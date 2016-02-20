@@ -41,7 +41,7 @@ DESCRIPTION
 %nodejs_prep
 
 %build
-#nothing to do
+%nodejs_build
 
 %install
 %nodejs_mkdir
