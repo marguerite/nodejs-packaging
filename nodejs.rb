@@ -81,6 +81,17 @@ def find_symlink(symlink="",target="")
         return realpath
 end
 
+def filter(file="")
+    
+    arr = f.split("/")
+    unless arr.include?(/^(\..*$|.*\.bat$|.*\.cmd$|Makefile|test*|example*|benchmark*|.*\.sh$|.*_test\..*$|browser$|.*\.orig$|.*\.bak$|windows$|.*\.sln$|.*\.njsproj$|.*\.exe$|.*\.c$|.*\.h$|.*\.cc$|.*\.cpp$)/)
+        return f
+    else
+        return nil
+    end
+
+end
+
 case ARGV[0]
 when "--prep"
     Dir.glob(sourcedir + "/*.tgz") do |tgz|
@@ -137,8 +148,7 @@ when "--build"
         io.close
     end
     # clean source/middle files
-    Dir.glob(sourcedir + "/**/*") do |f| 
-        FileUtils.rm_rf f if f.end_with?(/\.c|\.h|\.cc|\.cpp/)
+    Dir.glob(sourcedir + "/**/*") do |f|
         FileUtils.rm_rf f if f.index(/build\/(Release|Debug)/)
     end
     # clean empty directories
@@ -146,10 +156,13 @@ when "--build"
     
 when "--copy"
     Dir.glob(buildroot + "/**/*") do |dir|
-	name = dir.gsub(/^.*\//,'')
-	Dir.glob(sourcedir + "/" + name + "/*") do |f|
+        dir = filter(dir)
+        unless dir.nil?
+            name = dir.gsub(/^.*\//,'')
+            Dir.glob(sourcedir + "/" + name + "/*") do |f|
 		FileUtils.cp_r f,dir
-	end
+            end
+        end
     end
     
     Dir.glob(buildroot + "/**/*").sort{|x| x.size}.each do |dir|
@@ -158,9 +171,6 @@ when "--copy"
         if name.index(/-[0-9]\.[0-9]/)
                 FileUtils.mv dir,buildroot + prefix + name.gsub(/-[0-9].*$/,'')
         end
-	if name.index(/test|example|benchmark/)
-		FileUtils.rm_rf dir
-	end
     end
     
     # bower
@@ -186,18 +196,14 @@ when "--copy"
 			end
 		end
 		unless File.directory?(f) || File.symlink?(f) || f.end_with?("package.json") || f.end_with?("bower.json")
+                    f = filter(f)
+                    unless f.nil?
 			file = f.gsub(sourcedir + "/bower_components",'')
 			dir = f.gsub(file,'').gsub(sourcedir,main)
 			FileUtils.cp_r f,dir + file
+                    end
 		end
 	end  
-    end
-
-when "--clean"
-
-    open(buildroot + "/**/*") do |f|
-
-
     end
  
 when "--filelist"
