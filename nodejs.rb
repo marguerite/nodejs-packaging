@@ -83,9 +83,14 @@ end
 
 def filter(file="")
     
-    arr = f.split("/")
+    arr = file.split("/")
     unless arr.include?(/^(\..*$|.*\.bat$|.*\.cmd$|Makefile|test*|example*|benchmark*|.*\.sh$|.*_test\..*$|browser$|.*\.orig$|.*\.bak$|windows$|.*\.sln$|.*\.njsproj$|.*\.exe$|.*\.c$|.*\.h$|.*\.cc$|.*\.cpp$)/)
-        return f
+	if arr.include?(/LICENSE.*|.*\.md$|.*\.txt$/)
+		io = IO.popen("chmod -x #{file}")
+		io.close
+	end
+
+        return file
     else
         return nil
     end
@@ -133,7 +138,7 @@ when "--build"
     buildlist = []
     
     Dir.glob(sourcedir + "/**/*") do |f|
-        if f.end_with?(/\.c|\.h|\.cc|\.cpp/)
+        if f.end_with?(".c") || f.end_with?(".h") || f.end_with?(".cc") || f.end_with?(".cpp")
             name = f.gsub(/^.*node_modules\//,'').gsub(/\/.*$/,'')
             prefix = f.gsub(buildroot,'').gsub(/#{name}\/.*$/,'')
             prefix = buildroot + prefix + name
