@@ -12,14 +12,11 @@ selfreq,selfprov = {},{}
 
 ARGF.each do |f| 
   if f.strip.end_with?("package.json")
-	unless f.index(/\/test\//)
-    		reqlist << f.strip
-    
-    		if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-        		provlist << f.strip
-    		end
-	end
-  end 
+    reqlist << f.strip
+    if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
+      provlist << f.strip
+    end
+  end
 end
 
 # 1. parse the reqlist
@@ -99,7 +96,6 @@ selfreq.each do |k,v|
 end
 
 # 5. calculate the maximum node version
-
 node,max = [],[]
 
 reqlist.each do |j|
@@ -132,7 +128,6 @@ reqlist.each do |j|
 end
 
 node = ( node.uniq! if node.uniq! ) || node
-
 node.each do |v|
 	va = v.split('.')
 	va.push('0') if va.size < 3 # from now va.size = 3

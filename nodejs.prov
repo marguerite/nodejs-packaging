@@ -17,9 +17,7 @@ ARGF.each do |f|
 	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
 		pub << f.strip
 	else
-		unless f.index(/\/(test|example.*)\//)
-			priv << f.strip
-		end
+		priv << f.strip
 	end
 
     end
