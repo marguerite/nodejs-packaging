@@ -84,7 +84,7 @@ end
 def filter(file="")
     f = file.split("/")
     if f.grep(/^\..*$|.*~$|\.bat|\.cmd|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|\.sh|_test\.|browser$|\.orig|\.bak|windows|\.sln|\.njsproj|\.exe|\.c|\.h|\.cc|\.cpp/).empty?
-	if f.grep(/LICENSE|\.md|\.txt|\.markdown/)
+	unless f.grep(/LICENSE|\.md|\.txt|\.markdown/).empty?
 		io = IO.popen("chmod -x #{file}")
 		io.close
 	end
@@ -99,19 +99,19 @@ case ARGV[0]
 when "--prep"
     Dir.glob(sourcedir + "/*.tgz") do |tgz|
         name = tgz.gsub(/^.*\//,'').gsub('.tgz','')
-        io = IO.popen("tar --warning=none -xf #{tgz} -C #{sourcedir}")
+        io = IO.popen("tar --warning=none --no-same-owner --no-same-permissions -xf #{tgz} -C #{sourcedir}")
         io.close
         FileUtils.mv sourcedir + "/package",sourcedir + "/" + name
     end
     
     # bower
     if File.exist?(sourcedir + "/bower_components.tar.gz")
-	io = IO.popen("tar -xf #{sourcedir}/bower_components.tar.gz -C #{sourcedir}")
+	io = IO.popen("tar --no-same-owner --no-same-permissions -xf #{sourcedir}/bower_components.tar.gz -C #{sourcedir}")
 	io.close
 
     	Dir.glob(sourcedir + "/bower_components/**/*.tar.gz") do |dir|
 		dir1 = dir.gsub(dir.gsub(/^.*\//,''),'')
-        	io1 = IO.popen("tar -xf #{dir} -C #{dir1}")
+        	io1 = IO.popen("tar --no-same-owner --no-same-permissions -xf #{dir} -C #{dir1}")
         	io1.close
 		FileUtils.rm_rf dir
         	Dir.glob(dir1 + "/*") do |i|
@@ -167,7 +167,8 @@ when "--copy"
 			dir1 = file.gsub(/^.*[0-9]\.[0-9]/,'')
 			FileUtils.mkdir_p dir + dir1
 			Dir.glob(file + "/**/*") do |f1|
-				FileUtils.cp_r f1,dir + dir1
+				f2 = filter(f1)
+				FileUtils.cp_r f2,dir + dir1
 			end
 		else
 	    		FileUtils.cp_r file,dir
