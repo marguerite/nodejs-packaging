@@ -168,7 +168,9 @@ when "--copy"
 			FileUtils.mkdir_p dir + dir1
 			Dir.glob(file + "/**/*") do |f1|
 				f2 = filter(f1)
-				FileUtils.cp_r f2,dir + dir1
+				unless f2.nil?
+				  FileUtils.cp_r f2,dir + dir1
+				end
 			end
 		else
 	    		FileUtils.cp_r file,dir
