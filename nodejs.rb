@@ -54,6 +54,30 @@ def recursive_mkdir(json={},workspace="")
 
 end
 
+def recursive_copy(path="",dir="")
+
+    file = filter(path)
+    unless file.nil?
+      if File.directory? file
+        dir1 = file.gsub(/^.*[0-9]\.[0-9]/,'')
+        FileUtils.mkdir_p dir + dir1
+        Dir.glob(file + "/**/*") do |f1|
+          f2 = filter(f1)
+          unless f2.nil?
+            if File.directory? f2
+              recursive_copy(f2,dir + dir1)
+	    else
+              FileUtils.cp_r f2,dir + dir1
+	    end
+          end
+        end
+      else
+        FileUtils.cp_r file,dir
+      end
+    end
+
+end
+
 def backpath(path="",count="")
 
         count.times do
@@ -84,10 +108,11 @@ end
 def filter(file="")
     f = file.split("/")
     if f.grep(/^\..*$|.*~$|\.bat|\.cmd|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|\.sh|_test\.|browser$|\.orig|\.bak|windows|\.sln|\.njsproj|\.exe|\.c|\.h|\.cc|\.cpp/).empty?
-	unless f.grep(/LICENSE|\.md|\.txt|\.markdown/).empty?
-		io = IO.popen("chmod -x #{file}")
-		io.close
-	end
+	if File.file?(file) && File.executable?(file) && f.grep("bin").empty?
+	  puts "Fixing permission: " + file
+	  io = IO.popen("chmod -x #{file}")
+	  io.close
+        end
 	return file
     else
         return nil
@@ -161,19 +186,7 @@ when "--copy"
     Dir.glob(buildroot + "/**/*") do |dir|
         name = dir.gsub(/^.*\//,'')
         Dir.glob(sourcedir + "/" + name + "/*") do |f|
-	    file = filter(f)
-	    unless file.nil?
-		if File.directory? file
-			dir1 = file.gsub(/^.*[0-9]\.[0-9]/,'')
-			FileUtils.mkdir_p dir + dir1
-			Dir.glob(file + "/**/*") do |f1|
-				f2 = filter(f1)
-				FileUtils.cp_r f2,dir + dir1
-			end
-		else
-	    		FileUtils.cp_r file,dir
-		end
-	    end
+	    recursive_copy(f,dir)
         end
     end
     
