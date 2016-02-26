@@ -33,19 +33,18 @@ end
 
 def recursive_mkdir(json={},workspace="")
 
-    json.keys.each do |key|
-        version = json[key]["version"]
+    json.each do |key,v|
+        version = v["version"]
 	dest = workspace + "/" + key + "-" + version
         unless has_bundle(key,version)
 	  puts "Creating #{dest}"
 	  FileUtils.mkdir_p dest
         end
-	unless json[key] == nil
-		if json[key].keys.include?("dependencies")
-			version = json[key]["version"]
-			json[key]["dependencies"].each do |k,v|
+	unless v.nil?
+		if v.keys.include?("dependencies")
+			v["dependencies"].each do |k,v1|
 				i = {}
-				i[k] = v
+				i[k] = v1
 				recursive_mkdir(i,workspace + "/" + key + "-" + version + "/node_modules")
 			end
 		end
