@@ -74,7 +74,7 @@ if File.exist?(name + '.lst')
 
     deltaold.each do |d|
       unless d.nil?
-	p "#{d}.tgz needs to be deleted from source"
+	puts "\033[0;32m#{d}.tgz needs to be deleted from source\033[0m"
       end
     end
 
