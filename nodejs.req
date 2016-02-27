@@ -145,4 +145,4 @@ node.each do |v|
 	end		
 end
 
-puts "nodejs(engine) >= #{max[0]}.#{max[1]}.#{max[2]}"
+puts "nodejs(engine) >= #{max[0]}.#{max[1]}.#{max[2]}" unless max.empty?

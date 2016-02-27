@@ -174,6 +174,7 @@ when "--build"
     
     buildlist.each do |b|
         io = IO.popen("pushd #{b} && npm build -f && popd")
+	io.each_line {|l| puts l}
         io.close
     end
     # clean middle files
