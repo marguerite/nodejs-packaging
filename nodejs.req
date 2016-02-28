@@ -49,11 +49,18 @@ unless provlist.empty?
     provlist.each do |f|
         js = {}
         File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
+
+	# rpm can have "-" in version
+	if js["version"].index("-")
+	  version = js["version"].gsub("-",".")
+	else
+	  version = js["version"]
+	end
      
         if selfprov.key?(js["name"])
-            selfprov[js["name"]] << js["version"]
+            selfprov[js["name"]] << version
         else
-            selfprov[js["name"]] = [js["version"]]
+            selfprov[js["name"]] = [version]
         end
     end
 end

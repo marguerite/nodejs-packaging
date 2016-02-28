@@ -84,10 +84,9 @@ module Semver
                     va = [vs,'0','0']
                 end
 
-                # from now on, version_array.size = 3
-
                 default_op = ["~","^","*",
                             ">",">=","<","<="]
+		left = va[va.size - 1] if va.size > 3
 
                 if default_op.include?(op)
 
@@ -97,9 +96,17 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         
                         if dep.has_key?(name)
+			  if left
+			    dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+			  else
                             dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}"
+			  end
                         else
+			  if left
+			    dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+			  else
                             dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}"]
+			  end
                         end
                         
                     when ">="
@@ -107,9 +114,17 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         
                         if dep.has_key?(name)
+                          if left
+                            dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                          else
                             dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}"
+                          end
                         else
+                          if left
+                            dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                          else
                             dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}"]
+                          end
                         end
                         
                     when "<"
@@ -117,9 +132,17 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         
                         if dep.has_key?(name)
+                          if left
+                            dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                          else
                             dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}"
+                          end
                         else
+                          if left
+                            dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                          else
                             dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}"]
+                          end
                         end
                         
                     when "<="
@@ -127,17 +150,26 @@ module Semver
                         va[2] = "0" if va[2].index(/x|X/)
                         
                         if dep.has_key?(name)
+                          if left
+                            dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                          else
                             dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}"
+                          end
                         else
+                          if left
+                            dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                          else
                             dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}"]
+                          end
                         end
                         
                     when "~"
+			# ["1", "0", "0", "rc3"]
                         if va[0] == '0'
                             if va[1].index(/x|X/)
                                 high = "1.0.0"
                             else
-                                high = '0.' + (va[1].to_i + 1).to_s + '.0'
+                                high = '0.' + (va[1].to_i + 1).to_s + ".0"
                             end
                         else
                             if va[1].index(/x|X/) || va[1] == '0' && va[2] == '0'
@@ -148,8 +180,12 @@ module Semver
                         end
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        low = va[0] + '.' + va[1] + '.' + va[2]
-                        
+			if left
+			  low = va[0] + '.' + va[1] + '.' + va[2] + '.' + left
+			else
+                          low = va[0] + '.' + va[1] + '.' + va[2]
+                   	end
+
                         if dep.has_key?(name)
                             dep[name] << ">=#{low}"
                             dep[name] << "<#{high}"
@@ -173,7 +209,11 @@ module Semver
                         end
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
-                        low = va[0] + '.' + va[1] + '.' + va[2]
+			if left
+			  low = va[0] + '.' + va[1] + '.' + va[2] + '.' + left
+			else
+                          low = va[0] + '.' + va[1] + '.' + va[2]
+			end
                         
                         if dep.has_key?(name)
                             dep[name] << ">=#{low}"
