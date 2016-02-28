@@ -20,14 +20,11 @@ pkgjson = ""
 json = {}
 
 files.each do |f|
-	pkgjson = f if f.index(pkgname + "/package.json")
+    if f.index(pkgname + "/package.json")
+        # get its parent
+        pkgjson = f.gsub('node_modules/' + pkgname + '/package.json','') + "package.json"
+        File.open(pkgjson,'r:UTF-8') {|f| json = JSON.parse(f.read)}
+	json["dependencies"][pkgname] = dep
+	File.open(pkgjson,'w:UTF-8') {|f| f.write JSON.pretty_generate(json) }
+    end
 end
-
-# get its parent
-pkgjson = pkgjson.gsub('node_modules/' + pkgname + '/package.json','') + "package.json"
-
-File.open(pkgjson,'r:UTF-8') {|f| json = JSON.parse(f.read)}
-
-json["dependencies"][pkgname] = dep
-
-File.open(pkgjson,'w:UTF-8') {|f| f.write JSON.pretty_generate(json) }
