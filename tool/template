@@ -41,11 +41,13 @@ DESCRIPTION
 %nodejs_prep
 
 %build
-%nodejs_build
+# nothing to do
 
 %install
 %nodejs_mkdir
 %nodejs_copy
+%nodejs_build
+%nodejs_clean
 %nodejs_filelist
 # make your changes here, suppose:
 # %{buildroot}%{nodejs_sitelib}/%{name} exists

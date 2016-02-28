@@ -108,12 +108,7 @@ end
 
 def filter(file="")
     f = file.split("/")
-    if f.grep(/^\..*$|.*~$|\.bat$|\.cmd$|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|\.sh$|_test\.|browser$|\.orig$|\.bak$|windows|\.sln$|\.njsproj$|\.exe$|\.c$|\.h$|\.cc$|\.cpp$/).empty?
-	if File.file?(file) && File.executable?(file) && f.grep("bin").empty?
-	  puts "Fixing permission: " + file
-	  io = IO.popen("chmod -x #{file}")
-	  io.close
-        end
+    if f.grep(/^\..*$|.*~$|\.bat$|\.cmd$|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|\.sh$|_test\.|browser$|\.orig$|\.bak$|windows|\.sln$|\.njsproj$|\.exe$|appveyor\.yml/).empty?
 	return file
     else
         return nil
@@ -161,8 +156,8 @@ when "--mkdir"
 when "--build"
     buildlist = []
     
-    Dir.glob(sourcedir + "/**/*") do |f|
-        if f.end_with?(".c") || f.end_with?(".h") || f.end_with?(".cc") || f.end_with?(".cpp")
+    Dir.glob(buildroot + "/**/*") do |f|
+        if f.end_with?(".c") || f.end_with?(".cc") || f.end_with?(".cpp")
             name = f.gsub(/^.*node_modules\//,'').gsub(/\/.*$/,'')
             prefix = f.gsub(buildroot,'').gsub(/#{name}\/.*$/,'')
             prefix = buildroot + prefix + name
@@ -171,18 +166,21 @@ when "--build"
     end
     
     buildlist = ( buildlist.uniq! if buildlist.uniq! ) || buildlist
-    
+
     buildlist.each do |b|
-        io = IO.popen("pushd #{b} && npm build -f && popd")
-	io.each_line {|l| puts l}
-        io.close
+	gyp = Dir.glob(b + "/**/*").select{|f| f.end_with?(".gyp")}
+	node = Dir.glob(b + "/**/*").select{|f| f.end_with?(".node")}
+	if ! gyp.empty? && ! node.empty?
+          io = IO.popen("pushd #{b} && npm build -f && popd")
+	  io.each_line {|l| puts l}
+	  io.close
+	elsif ! gyp.empty? && node.empty?
+	  node_gyp = Dir.glob("/usr/lib*/node_modules/npm/node_modules/node-gyp/bin")[0] + "/node-gyp.js"
+	  io1 = IO.popen("pushd #{b} && #{node_gyp} rebuild && popd")
+          io1.each_line {|l| puts l}
+          io1.close
+        end
     end
-    # clean middle files
-    Dir.glob(sourcedir + "/**/*") do |f|
-        FileUtils.rm_rf f if f.index(/build\/(Release|Debug)/)
-    end
-    # clean empty directories
-    Dir[sourcedir + "/**/*"].select{|d| File.directory? d}.select{|d| (Dir.entries(d) - %w[ . .. ]).empty?}.each{|d| Dir.rmdir d}
     
 when "--copy"
     Dir.glob(buildroot + "/**/*") do |dir|
@@ -233,6 +231,28 @@ when "--copy"
 	end  
     end
  
+when "--clean"
+
+  # clean source files
+  Dir.glob(buildroot + sitelib + "/**/{*,.*}") do |f|
+    if f.end_with?(".c") || f.end_with?(".h") || f.end_with?(".cc") || f.end_with?(".cpp") || f.end_with?(".o") || f.gsub(/^.*\//,'').start_with?(".") || f.end_with?("Makefile") || f.end_with?(".mk") || f.end_with?(".gyp") || f.end_with?(".gypi")
+	puts "Cleaning " + f
+	FileUtils.rm_rf f
+    end
+    unless f.index("build/Release")
+      if File.file?(f) && File.executable?(f) && f.split("/").grep("bin").empty?
+        puts "Fixing permission: " + f
+        io = IO.popen("chmod -x #{f}")
+        io.close
+      end
+    else
+	FileUtils.rm_rf f if f.index("obj.target")
+    end
+  end
+
+  # clean empty directories
+  Dir[buildroot + sitelib + "/**/{*,.*}"].select{|d| File.directory? d}.select{|d| (Dir.entries(d) - %w[ . .. ]).empty?}.each{|d| Dir.rmdir d}
+
 when "--filelist"
     
     open(sourcedir + "/files.lst","w:UTF-8") do |file|
@@ -245,7 +265,6 @@ when "--filelist"
                 file.write f.gsub(buildroot,'') + "\n"
             end
         end
-    end
-    
+    end 
 end
 
