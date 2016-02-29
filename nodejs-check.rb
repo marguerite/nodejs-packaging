@@ -1,14 +1,15 @@
+#!/usr/bin/env ruby
 require 'json'
 
 # check where a module comes from
 mod = ARGV[0]
 
-if mod
+unless mod.nil?
   Dir.glob("./**/package.json") do |f|
     open(f) do |file|
       json = JSON.parse(file.read)
       unless json["dependencies"].nil?
-        puts f if json["dependencies"].include?(name)
+        puts f if json["dependencies"].include?(mod)
       end
     end
   end

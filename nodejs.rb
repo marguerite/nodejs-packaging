@@ -108,7 +108,7 @@ end
 
 def filter(file="")
     f = file.split("/")
-    if f.grep(/^\..*$|.*~$|\.bat$|\.cmd$|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|\.sh$|_test\.|browser$|\.orig$|\.bak$|windows|\.sln$|\.njsproj$|\.exe$|appveyor\.yml/).empty?
+    if f.grep(/^\..*$|.*~$|\.bat$|\.cmd$|Makefile|test(s)?(\.js)?|example(s)?(\.js)?|benchmark(s)?(\.js)?|sample(s)?(\.js)?|\.sh$|_test\.|browser$|\.orig$|\.bak$|windows|\.sln$|\.njsproj$|\.exe$|appveyor\.yml/).empty?
 	return file
     else
         return nil
