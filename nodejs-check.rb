@@ -1,11 +1,17 @@
 #!/usr/bin/env ruby
 require 'json'
 
+require '/usr/lib/rpm/nodejs/bundles.rb'
+include Bundles
+
+buildroot = Bundles.getbuildroot
+sitelib = Bundles.getsitelib
+
 # check where a module comes from
 mod = ARGV[0]
 
 unless mod.nil?
-  Dir.glob("./**/package.json") do |f|
+  Dir.glob(buildroot + sitelib + "/**/package.json") do |f|
     open(f) do |file|
       json = JSON.parse(file.read)
       unless json["dependencies"].nil?
@@ -16,7 +22,7 @@ unless mod.nil?
 end
 
 # check left-over bower.json dependencies
-Dir.glob("./**/*") do |f|
+Dir.glob(buildroot + sitelib + "/**/*") do |f|
   if f.end_with?("bower.json")
     open(f) do |file|
       json = JSON.parse(file.read)

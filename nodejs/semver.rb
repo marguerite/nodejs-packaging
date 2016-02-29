@@ -97,13 +97,13 @@ module Semver
                         
                         if dep.has_key?(name)
 			  if left
-			    dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+			    dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}-#{left}"
 			  else
                             dep[name] << ">#{va[0]}.#{va[1]}.#{va[2]}"
 			  end
                         else
 			  if left
-			    dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+			    dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}-#{left}"]
 			  else
                             dep[name] = [">#{va[0]}.#{va[1]}.#{va[2]}"]
 			  end
@@ -115,13 +115,13 @@ module Semver
                         
                         if dep.has_key?(name)
                           if left
-                            dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                            dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}-#{left}"
                           else
                             dep[name] << ">=#{va[0]}.#{va[1]}.#{va[2]}"
                           end
                         else
                           if left
-                            dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                            dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}-#{left}"]
                           else
                             dep[name] = [">=#{va[0]}.#{va[1]}.#{va[2]}"]
                           end
@@ -133,13 +133,13 @@ module Semver
                         
                         if dep.has_key?(name)
                           if left
-                            dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                            dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}-#{left}"
                           else
                             dep[name] << "<#{va[0]}.#{va[1]}.#{va[2]}"
                           end
                         else
                           if left
-                            dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                            dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}-#{left}"]
                           else
                             dep[name] = ["<#{va[0]}.#{va[1]}.#{va[2]}"]
                           end
@@ -151,13 +151,13 @@ module Semver
                         
                         if dep.has_key?(name)
                           if left
-                            dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"
+                            dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}-#{left}"
                           else
                             dep[name] << "<=#{va[0]}.#{va[1]}.#{va[2]}"
                           end
                         else
                           if left
-                            dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}.#{left}"]
+                            dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}-#{left}"]
                           else
                             dep[name] = ["<=#{va[0]}.#{va[1]}.#{va[2]}"]
                           end
@@ -181,7 +181,7 @@ module Semver
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
 			if left
-			  low = va[0] + '.' + va[1] + '.' + va[2] + '.' + left
+			  low = va[0] + '.' + va[1] + '.' + va[2] + '-' + left
 			else
                           low = va[0] + '.' + va[1] + '.' + va[2]
                    	end
@@ -210,7 +210,7 @@ module Semver
                         va[1] = "0" if va[1].index(/x|X/)
                         va[2] = "0" if va[2].index(/x|X/)
 			if left
-			  low = va[0] + '.' + va[1] + '.' + va[2] + '.' + left
+			  low = va[0] + '.' + va[1] + '.' + va[2] + '-' + left
 			else
                           low = va[0] + '.' + va[1] + '.' + va[2]
 			end

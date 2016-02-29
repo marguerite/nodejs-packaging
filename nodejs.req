@@ -25,7 +25,7 @@ reqlist.each do |f|
     	js = {}
         File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
         
-        unless js["dependencies"] == nil
+        unless js["dependencies"].nil?
             js["dependencies"].each do |k,v|
                 deps = Semver.parse(k,v)
                 # {"semver"=>[">=4.1.0","<5.0.0"]}
@@ -49,18 +49,11 @@ unless provlist.empty?
     provlist.each do |f|
         js = {}
         File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
-
-	# rpm can have "-" in version
-	if js["version"].index("-")
-	  version = js["version"].gsub("-",".")
-	else
-	  version = js["version"]
-	end
      
         if selfprov.key?(js["name"])
-            selfprov[js["name"]] << version
+            selfprov[js["name"]] << js["version"]
         else
-            selfprov[js["name"]] = [version]
+            selfprov[js["name"]] = [js["version"]]
         end
     end
 end
