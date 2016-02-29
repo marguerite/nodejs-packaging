@@ -36,6 +36,7 @@
 
 %nodejs_symlink_deps %{_prefix}/lib/rpm/nodejs-symlink-deps.rb
 %nodejs_fixdep %{_prefix}/lib/rpm/nodejs-fixdep.rb
+%nodejs_check %{_prefix}/lib/rpm/nodejs-check.rb
 
 #compat opensuse
 %nodejs_modulesdir %{nodejs_sitelib}
