@@ -189,13 +189,27 @@ when "--copy"
 	    recursive_copy(f,dir)
         end
     end
-    
+
+    # rename    
     Dir.glob(buildroot + "/**/*").sort{|x| x.size}.each do |dir|
         name = dir.gsub(/^.*\//,'')
 	prefix = dir.gsub(buildroot,'').gsub(name,'')
         if name.index(/-[0-9]\.[0-9]/)
                 FileUtils.mv dir,buildroot + prefix + name.gsub(/-[0-9].*$/,'')
         end
+    end
+
+    # auto symlink executables in bin to /usr/bin
+    Dir.glob(buildroot + "/**/*") do |f|
+	unless f.split("/").grep("bin").empty? || f.end_with?(".node")
+	  if File.file?(f) && File.executable?(f)
+		FileUtils.mkdir_p buildroot + "/usr/bin" unless Dir.exist?(buildroot + "/usr/bin")
+		name = f.gsub(/^.*\/bin\//,'')
+		prefix = f.gsub(buildroot,'').gsub(/#{name}$/,'')
+		puts "Linking #{prefix}#{name} to /usr/bin/#{name}"
+		FileUtils.ln_sf prefix + name, buildroot + "/usr/bin/" + name
+	  end
+	end
     end
     
     # bower
