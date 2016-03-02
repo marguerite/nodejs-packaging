@@ -34,7 +34,8 @@ module Bower
 		json = dependency(name)
 		jsonnew = {}
 
-		json.each do |k,v|
+		unless json.nil? || json.empty?
+		  json.each do |k,v|
 			url,j,version = "",{},""
 			file = Download.get("http://bower.herokuapp.com/packages/" + k)
 			if File.exist?(file)
@@ -84,6 +85,7 @@ module Bower
 
 			end
 			jsonnew[k] = url
+		  end
 		end
 
 		return jsonnew
@@ -93,7 +95,9 @@ module Bower
 	def install(name="")
 
 		json = lookup(name)
-		json.each do |k,v|
+
+		unless json.nil? || json.empty?
+		  json.each do |k,v|
 			io = IO.popen("mkdir -p bower_components/#{k}")
 			io.close
 			io1 = IO.popen("wget #{v}")
@@ -102,6 +106,7 @@ module Bower
 			if File.exist? tarball
 				FileUtils.mv tarball,"bower_components/#{k}/"
 			end
+		  end
 		end
 
 		if File.exist? "bower_components"
