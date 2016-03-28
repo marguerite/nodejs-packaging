@@ -2,3 +2,4 @@
   + nodejs.prov and nodejs.req. npkg don't need to
 * support grunt auto tasks
 * support node-nsp security check
+* support bower() in nodejs.prov
