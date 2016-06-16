@@ -29,6 +29,33 @@ module Bower
 
 	end
 
+	def get_version(url="",versions=[])
+
+		html = Nokogiri::HTML(open(url))
+		html.xpath('//span[@class="tag-name"]').each {|f| versions << f.text}
+
+		if html.xpath('//div[@class="pagination"]/a')
+			newurls = []
+			html.xpath('//div[@class="pagination"]/a/@href').each do |l|
+				 newurls << l.value
+			end
+			if newurls.size > 1
+				newurl = newurls[1]
+				get_version(newurl,versions)
+			else
+				if html.xpath('//div[@class="pagination"]/a').text == "Next"
+					newurl = newurls[0]
+					get_version(newurl,versions)
+				else
+					return versions
+				end
+			end
+		else
+			return versions
+		end
+
+	end
+
 	def lookup(name="")
 
 		json = dependency(name)
@@ -42,10 +69,12 @@ module Bower
 				open(file) {|f| j = JSON.parse(f.read)}
 				FileUtils.rm_f file
 				url = j["url"].gsub("git://","https://").gsub(".git","")
-				html = Nokogiri::HTML(open(url + "/tags"))
 				versions_pre,versions,matches = [],[],[]
-				html.xpath('//span[@class="tag-name"]').each {|f| versions_pre << f.text
-}
+
+				# in case there're more than one page of tags
+				puts "Processing " + k
+				versions_pre = get_version(url + "/tags")
+
 				# remove the prefix "v" in eg v3.0.0
 				versions_pre.each do |v1|
 					if v1.index(/^v/)
