@@ -1,3 +1,0 @@
-* node-mgmt-json-statistics.rb
-  + get statistics from <name>.json, may used later to create a common package
-* don't hardcode repositories, use ARGV and set default
