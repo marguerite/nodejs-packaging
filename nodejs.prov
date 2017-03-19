@@ -1,59 +1,43 @@
 #!/usr/bin/env ruby
 
-require 'rubygems'
 require 'json'
-require '/usr/lib/rpm/nodejs/bundles.rb'
-include Bundles
 
-pub,priv,provides = [],[],[]
+pub = []
+priv = []
 internal = {}
 
-ARGF.each do |f|
-
-    # support RPM < 4.9.1
-    if f.strip.end_with?("package.json")
-
-	# local dependencies has at least two node_modules
-	unless f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-		pub << f.strip
-	else
-		priv << f.strip
-	end
-
-    end
-
+ARGF.each do |file|
+  # support RPM < 4.9.1
+  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components')
+  # local dependencies has at least two node_modules
+  if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
+    priv << file.strip
+  else
+    pub << file.strip
+  end
 end
 
-pub.each do |f|
-
-	js = {}
-	File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
-
-	provides << "npm(" + js["name"] + ") = " + js["version"]
-
+provides = pub.map! do |json|
+  js = JSON.parse(open(json, 'r:UTF-8').read)
+  'npm(' + js['name'] + ') = ' + js['version']
 end
 
 unless priv.empty?
-    priv.each do |f|
-        js = {}
-        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
-
-        if internal.key?(js["name"].to_sym)
-            internal[js["name"].to_sym] << js["version"]
-        else
-            internal[js["name"].to_sym] = [js["version"]]
-        end
+  priv.each do |json|
+    js = JSON.parse(open(json, 'r:UTF-8').read)
+    if internal.key?(js['name'])
+      internal[js['name']] << js['version']
+    else
+      internal[js['name']] = [js['version']]
     end
+  end
 end
 
 # uniq internal
-internal.each {|k,v| internal[k] = (v.uniq! if v.uniq!) || v}
+internal.each { |k, v| internal[k] = v.uniq }
 
-provides.each {|i| puts i }
+provides.each { |i| puts i }
 
-internal.each do |k,v|
-	v.each do |i|
-		puts "own(#{k}) = #{i}"
-	end
+internal.each do |k, v|
+  v.each { |i| puts "own(#{k}) = #{i}" }
 end
-

@@ -27,12 +27,12 @@
 %nil \
 %endif
 
-%nodejs_prep node2rpm --prep
-%nodejs_mkdir node2rpm --mkdir
-%nodejs_copy node2rpm --copy
-%nodejs_build node2rpm --build
-%nodejs_clean node2rpm --clean
-%nodejs_filelist node2rpm --filelist
+%nodejs_prep node2rpm-server --prep
+%nodejs_mkdir node2rpm-server --mkdir
+%nodejs_copy node2rpm-server --copy
+%nodejs_build node2rpm-server --build
+%nodejs_clean node2rpm-server --clean
+%nodejs_filelist node2rpm-server --filelist
 
 %nodejs_symlink_deps %{_prefix}/lib/rpm/nodejs-symlink-deps.rb
 %nodejs_fixdep %{_prefix}/lib/rpm/nodejs-fixdep.rb
