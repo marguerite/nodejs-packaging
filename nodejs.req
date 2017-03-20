@@ -1,148 +1,104 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 
-require 'rubygems'
 require 'json'
-require '/usr/lib/rpm/nodejs/semver.rb'
-require '/usr/lib/rpm/nodejs/vcmp.rb'
-include Semver
-include Vcmp
+require 'node-semver'
 
-reqlist,provlist = [],[]
-selfreq,selfprov = {},{}
+reqlist = []
+provlist = []
+selfreq = {}
+selfprov = {}
 
-ARGF.each do |f| 
-  if f.strip.end_with?("package.json")
-    reqlist << f.strip
-    if f.index(/\/usr\/lib.*\/node_modules\/.*\/node_modules/)
-      provlist << f.strip
-    end
-  end
+ARGF.each do |file|
+  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components') 
+  reqlist << file.strip
+  provlist << file.strip if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
 end
 
 # 1. parse the reqlist
 
 reqlist.each do |f|
-    	js = {}
-        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
-        
-        unless js["dependencies"].nil?
-            js["dependencies"].each do |k,v|
-                deps = Semver.parse(k,v)
-                # {"semver"=>[">=4.1.0","<5.0.0"]}
-                deps.each do |m,n|
-                    if selfreq.key?(m)
-                        n.each { |i| selfreq[m] << i }
-                    else
-                        selfreq[m] = n
-                    end
-                end
-            end
-        end
+  js = JSON.parse(open(f, 'r:UTF-8').read)
+  next if js['dependencies'].nil?
+  js['dependencies'].each do |k, v|
+    if selfreq.key?(k)
+      selfreq[k] << v
+    else
+      selfreq[k] = [v]
+    end
+  end
 end
 
 # uniq selfreq
-selfreq.each {|k,v| selfreq[k] = (v.uniq! if v.uniq!) || v}
+selfreq.each { |k, v| selfreq[k] = v.uniq }
 
 # 2. parse the provlist
 
 unless provlist.empty?
-    provlist.each do |f|
-        js = {}
-        File.open(f,'r:UTF-8') {|f1| js = JSON.parse(f1.read)}
-     
-        if selfprov.key?(js["name"])
-            selfprov[js["name"]] << js["version"]
-        else
-            selfprov[js["name"]] = [js["version"]]
-        end
+  provlist.each do |json|
+    js = JSON.parse(open(json, 'r:UTF-8').read)
+    if selfprov.key?(js['name'])
+      selfprov[js['name']] << js['version']
+    else
+      selfprov[js['name']] = [js['version']]
     end
+  end
 end
 
 # uniq selfprov
-selfprov.each {|k,v| selfprov[k] = (v.uniq! if v.uniq!) || v}
+selfprov.each { |k, v| selfprov[k] = v.uniq }
 
 # 3. parse the reqs
-
-selfreq.keys.each do |req| # "vinyl"=>[">=0.5.0", "<0.6.0", ">=0.4.0", "<0.5.0"]
-
-	selfprov.keys.each do |prov|
-
-	if req.eql? prov
-
-	    selfprov[prov].each do |i|
-		selfreq[req].reject!  { |j| # >=0.5.0
-			op = j.gsub(/[0-9].*$/,'')
-			ve = j.gsub(op,'')
-			Vcmp.comp(i,op,ve)
-		}
-	    end
-
-	end
-
-	end
-
+selfprov.each do |k, v|
+  next if selfreq[k].nil?
+  selfreq[k].reject! do |i|
+    match = false
+    v.each do |j|
+      next unless Semver.satisfies(j, i)
+      match = true
+      break
+    end
+    match
+  end
 end
 
-selfreq.reject! { |_k,v| v.empty? }
+selfreq.reject! { |_k, v| v.empty? }
 
 # 4. print the real reqs
 
-selfreq.each do |k,v|
-        v.each do |i|
-                op = i.gsub(/[0-9].*$/,'')
-                ve = i.gsub(op,'')
-                puts "npm(#{k}) #{op} #{ve}"
-        end
+selfreq.each do |k, v|
+  whole = []
+  v.each { |i| whole.concat(Semver.valid_range(i)) }
+  whole.uniq.each do |j|
+    r = j.match(/([^\d]+)(\d.*)/)
+    puts "npm(#{k}) #{r[1]} #{r[2]}"
+  end
 end
 
 # 5. calculate the maximum node version
-node,max = [],[]
+node = []
+max = []
 
 reqlist.each do |j|
-
-	File.open(j,'r:UTF-8') do |f|
-		json = JSON.parse(f.read)
-		if json["engines"]
-		     if json["engines"].class == String
-			m = json["engines"].gsub(/[0-9].*/,'')
-			v = json["engines"].gsub(m,'')
-			v = v.gsub(/x|X/,'0')
-			unless node.include?(v)
-				node << v
-			end
-		     else
-			json["engines"].each do |k,v1|
-				unless k != "node" || v1 == nil || v1 == "*" # "*" means >= 0.0.0
-					m = v1.gsub(/[0-9].*/,'')
-					v1 = v1.gsub(m,'') # remove the ">=", always be
-					v1 = v1.gsub(/x|X/,'0') # replace 0.1.x with 0.1.0
-					unless node.include?(v1)
-						node << v1
-					end
-				end
-			end
-		     end
-		end
-	end
-
+  json = JSON.parse(open(j, 'r:UTF-8').read)
+  next unless json['engines']
+  if json['engines'].class == Array
+    json['engines'].each do |i|
+      r = i.match(/[^\d]+(\d.*)/)
+      node << r[1]
+    end
+  elsif json['engines'].class == String
+    r = json['engines'].match(/[^\d]+(\d.*)/)
+    node << r[1]
+  else # Hash
+    ver = json['engines']['node'].sub('*', '0.0.0')
+    if ver.index('||')
+      ver.split('||').each { |i| node << (i.match(/[^\d]+(\d.*)/) ? Regexp.last_match(1) : i).strip }
+    else
+      node << (ver.match(/[^\d]+(\d.*)/) ? Regexp.last_match(1) : ver)
+    end
+  end
 end
 
-node = ( node.uniq! if node.uniq! ) || node
-node.each do |v|
-	va = v.split('.')
-	va.push('0') if va.size < 3 # from now va.size = 3
-	va.each_index {|i| va[i] = va[i].to_i} # value to integer
-	if max.empty?
-		max = va
-	else
-		3.times do |i|
-			if max[i] < va[i]
-				max = va
-			elsif max[i] == va[i]
-				next
-			end
-		end
-	end		
-end
+max = node.empty? ? nil : node.uniq.sort[-1]
 
-puts "nodejs(engine) >= #{max[0]}.#{max[1]}.#{max[2]}" unless max.empty?
+puts "nodejs(engine) >= #{max}" unless max.nil?
