@@ -65,13 +65,23 @@ parser.parse!(ARGV)
 
 if options.bundle
   raise 'you need to provide some modules to symlink!' if options.mods.nil?
-  locals = []
   Dir.glob(buildroot + sitelib + '/**/package.json').each do |js|
     json = JSON.parse(open(js, 'r:UTF-8').read)
     next if json['dependencies'].nil? || json['dependencies'].empty?
-    next if json['dependencies'].keys & options.mods
-    # Continue refactoring here.
-    # FIXME: should check if the module to be symlinked is a symlink itself.
+    dedupe = json['dependencies'].keys & options.mods
+    next if dedupe.empty?
+    h = Hash[options.mods.zip(options.vers)] unless options.vers.nil?
+    dedupe.each do |i|
+      orig_dir = File.join(File.split(js)[0], i)
+      dest_dir = File.join(buildroot + sitelib, i)
+      ver = JSON.parse(open(File.join(orig_dir, 'package.json'), 'r:UTF-8').read)['version']
+      next unless h.nil? || h[i] == ver
+      if File.symlink?(orig_dir)
+        Node2RPM.server.new.send :real_symlink, orig_dir, dest_dir
+      else
+        FileUtils.ln_sf orig_dir.sub(buildroot, ''), dest_dir
+      end
+    end
   end
 else
   # single-mode packaging goes here.
