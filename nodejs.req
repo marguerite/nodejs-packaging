@@ -8,8 +8,8 @@ provlist = []
 selfreq = {}
 selfprov = {}
 
-ARGF.each do |file|
-  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components') 
+ARGV.each do |file|
+  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components')
   reqlist << file.strip
   provlist << file.strip if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
 end
@@ -76,7 +76,6 @@ end
 
 # 5. calculate the maximum node version
 node = []
-max = []
 
 reqlist.each do |j|
   json = JSON.parse(open(j, 'r:UTF-8').read)
@@ -92,9 +91,9 @@ reqlist.each do |j|
   else # Hash
     ver = json['engines']['node'].sub('*', '0.0.0')
     if ver.index('||')
-      ver.split('||').each { |i| node << (i.match(/[^\d]+(\d.*)/) ? Regexp.last_match(1) : i).strip }
+      ver.split('||').each { |i| node << (i =~ /[^\d]+(\d.*)/ ? Regexp.last_match(1) : i).strip }
     else
-      node << (ver.match(/[^\d]+(\d.*)/) ? Regexp.last_match(1) : ver)
+      node << (ver =~ /[^\d]+(\d.*)/ ? Regexp.last_match(1) : ver)
     end
   end
 end

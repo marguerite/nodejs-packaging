@@ -1,0 +1,2 @@
+* check: compare versioned bower dependencies
+* fixdep: partial match, or just provide a version satisfies the range, for 'before' parameter.

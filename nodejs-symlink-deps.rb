@@ -27,7 +27,7 @@ parser = OptionParser.new do |opts|
                  it will symlink the bundled dependencies in node_modules
                  to the global sitelib. it is useful if you want this
                  package to also provide some other modules.
-                 
+
                  or nodejs-symlink-deps without any parameter will creating
                  false symlinks (the source may not exist on your system at
                  all) for every dependency in package.json, from the global
@@ -88,13 +88,15 @@ else
   # FIXME: should write a new check in nodejs_check to see if symlink has been run
   pkg = Dir.glob(buildroot + sitelib + '/**/package.json').sort { |x| x.size }[0]
   path = File.join(File.split(pkg)[0], 'node_modules')
-  raise 'node_modules directory already exists!
-         this indicates this package contains \'bundleDependency\' provided
-         upstream. the common practice is to remove the node_modules before
-         running nodejs_symlink_deps. unless you got permission from openSUSE
-         nodejs team, please DO NOT skip the nodejs_symlink_deps procedure
-         for single-mode packaging. It\'s dangerous!
-        ' if File.exist?(path)
+  if File.exist?(path)
+    raise 'node_modules directory already exists!
+           this indicates this package contains \'bundleDependency\' provided
+           upstream. the common practice is to remove the node_modules before
+           running nodejs_symlink_deps. unless you got permission from openSUSE
+           nodejs team, please DO NOT skip the nodejs_symlink_deps procedure
+           for single-mode packaging. It\'s dangerous!
+          '
+  end
   FileUtils.mkdir_p path
   json = JSON.parse(open(pkg, 'r:UTF-8').read)
   unless json['dependencies'].nil? || json['dependencies'].empty?
