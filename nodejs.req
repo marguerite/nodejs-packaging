@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require 'node-semver'
+require 'node_semver'
 
 reqlist = []
 provlist = []
@@ -53,7 +53,7 @@ selfprov.each do |k, v|
   selfreq[k].reject! do |i|
     match = false
     v.each do |j|
-      next unless Semver.satisfies(j, i)
+      next unless NodeSemver.satisfies(j, i)
       match = true
       break
     end
@@ -67,7 +67,7 @@ selfreq.reject! { |_k, v| v.empty? }
 
 selfreq.each do |k, v|
   whole = []
-  v.each { |i| whole.concat(Semver.valid_range(i)) }
+  v.each { |i| whole.concat(NodeSemver.valid_range(i)) }
   whole.uniq.each do |j|
     r = j.match(/([^\d]+)(\d.*)/)
     puts "npm(#{k}) #{r[1]} #{r[2]}"
