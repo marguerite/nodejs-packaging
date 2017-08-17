@@ -8,7 +8,7 @@ provlist = []
 selfreq = {}
 selfprov = {}
 
-ARGV.each do |file|
+ARGF.each do |file|
   next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components')
   reqlist << file.strip
   provlist << file.strip if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
@@ -20,6 +20,7 @@ reqlist.each do |f|
   js = JSON.parse(open(f, 'r:UTF-8').read)
   next if js['dependencies'].nil?
   js['dependencies'].each do |k, v|
+    next if k == 'bower'
     if selfreq.key?(k)
       selfreq[k] << v
     else
