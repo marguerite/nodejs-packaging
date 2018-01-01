@@ -1,43 +1,37 @@
 #!/usr/bin/env ruby
 
 require 'json'
+require 'node2rpm'
 
-pub = []
-priv = []
-internal = {}
-
-ARGF.each do |file|
-  # support RPM < 4.9.1
-  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components')
-  # local dependencies has at least two node_modules
-  if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
-    priv << file.strip
+def fill_internal(name, version, hash)
+  if hash[name].nil?
+    hash[name] = [version]
   else
-    pub << file.strip
+    hash[name] << version
   end
+  hash
 end
 
-provides = pub.map! do |json|
-  js = JSON.parse(open(json, 'r:UTF-8').read)
-  'npm(' + js['name'] + ') = ' + js['version']
-end
-
-unless priv.empty?
-  priv.each do |json|
-    js = JSON.parse(open(json, 'r:UTF-8').read)
-    if internal.key?(js['name'])
-      internal[js['name']] << js['version']
-    else
-      internal[js['name']] = [js['version']]
+def print_internal(hash)
+  hash.each do |k, v|
+    v.each do |_v|
+      puts 'own(' + k + ') = ' + _v
     end
   end
 end
 
-# uniq internal
-internal.each { |k, v| internal[k] = v.uniq }
+internal = {}
 
-provides.each { |i| puts i }
-
-internal.each do |k, v|
-  v.each { |i| puts "own(#{k}) = #{i}" }
+Dir.glob(Node2RPM::System.buildroot + '/**/package.json') do |f|
+  next if f.index('bower_components')
+  json = JSON.parse(open(f.strip,'r:UTF-8').read)
+  name = json['name']
+  version = json['version']
+  if f =~ %r{node_modules/.*?/node_modules}
+    internal = fill_internal(name, version, internal)
+  else
+    puts 'npm(' + name + ') = ' + version
+  end
 end
+
+print_internal(internal)

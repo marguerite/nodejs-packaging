@@ -1,104 +1,98 @@
 #!/usr/bin/env ruby
 
 require 'json'
-require 'node_semver'
+require 'node2rpm'
 
-reqlist = []
-provlist = []
-selfreq = {}
-selfprov = {}
-
-ARGF.each do |file|
-  next unless file =~ /package\.json(\n)?$/ && !file.index('bower_components')
-  reqlist << file.strip
-  provlist << file.strip if file =~ %r{/usr/lib.*?/node_modules/.*/node_modules}
+def fill_prov(name, version, hash)
+  if hash[name].nil?
+    hash[name] = [version]
+  else
+    hash[name] << version
+  end
+  hash
 end
 
-# 1. parse the reqlist
-
-reqlist.each do |f|
-  js = JSON.parse(open(f, 'r:UTF-8').read)
-  next if js['dependencies'].nil?
-  js['dependencies'].each do |k, v|
-    next if k == 'bower'
-    if selfreq.key?(k)
-      selfreq[k] << v
+def fill_req(dependencies, hash)
+  return hash if dependencies.nil? || dependencies.empty?
+  dependencies.each do |k,v|
+    if hash[k].nil?
+      hash[k] = [v]
     else
-      selfreq[k] = [v]
+      hash[k] << v
+    end
+  end
+  hash
+end
+
+def req_satisfy(array, range_array)
+  array.map! do |a|
+    range_array.map do |r|
+      NodeSemver.satisfies(a, r)
+    end.include?(true)
+  end.include?(true)
+end
+
+def split(version)
+  [version.gsub(/(>|<|=)\d+.*$/, '\1'),
+   version.gsub(/.*?(\d+.*)/, '\1')]
+end
+
+def print_req(name, range)
+  name = 'npm(' + name + ')'
+  range.each do |r|
+    NodeSemver.valid_range(r).each do |version|
+      comparator, target_version = split(version)
+      puts name + "\s" + comparator + "\s" + target_version
     end
   end
 end
 
-# uniq selfreq
-selfreq.each { |k, v| selfreq[k] = v.uniq }
-
-# 2. parse the provlist
-
-unless provlist.empty?
-  provlist.each do |json|
-    js = JSON.parse(open(json, 'r:UTF-8').read)
-    if selfprov.key?(js['name'])
-      selfprov[js['name']] << js['version']
+def fill_engine(engine, array)
+  return array if engine.nil?
+  regex = /[^\d]+(\d+.*)/
+  case engine.class
+  when Array
+    engine.each {|e| array << regex_fill(e, regex) }
+  when String
+    array << regex_fill(engine, regex)
+  else
+    v = engine['node']
+    return array if v.nil? || v.empty?
+    v = v.sub('*', '0.0.0')
+    if v.index('||')
+      v.split('||').each {|e| array << regex_fill(e, regex) }
     else
-      selfprov[js['name']] = [js['version']]
+      array << regex_fill(v, regex)
     end
   end
+  array
 end
 
-# uniq selfprov
-selfprov.each { |k, v| selfprov[k] = v.uniq }
-
-# 3. parse the reqs
-selfprov.each do |k, v|
-  next if selfreq[k].nil?
-  selfreq[k].reject! do |i|
-    match = false
-    v.each do |j|
-      next unless NodeSemver.satisfies(j, i)
-      match = true
-      break
-    end
-    match
-  end
+def regex_fill(string, regex)
+  string =~ regex ? Regexp.last_match(1).strip : string.strip
 end
 
-selfreq.reject! { |_k, v| v.empty? }
+prov = {}
+req = {}
+engines = []
 
-# 4. print the real reqs
-
-selfreq.each do |k, v|
-  whole = []
-  v.each { |i| whole.concat(NodeSemver.valid_range(i)) }
-  whole.uniq.each do |j|
-    r = j.match(/([^\d]+)(\d.*)/)
-    puts "npm(#{k}) #{r[1]} #{r[2]}"
-  end
+Dir.glob(Node2RPM::System.buildroot + '/**/*') do |f|
+  next unless f =~ %r{/package\.json(\\n)?} && !f.index('bower_components')
+  json = JSON.parse(open(f.strip, 'r:UTF-8').read)
+  name = json['name']
+  version = json['version']
+  dependencies = json['dependencies']
+  engine = json['engines']
+  engines = fill_engine(engine, engines)
+  prov = fill_prov(name, version, prov)
+  req = fill_req(dependencies, req)
 end
 
-# 5. calculate the maximum node version
-node = []
-
-reqlist.each do |j|
-  json = JSON.parse(open(j, 'r:UTF-8').read)
-  next unless json['engines']
-  if json['engines'].class == Array
-    json['engines'].each do |i|
-      r = i.match(/[^\d]+(\d.*)/)
-      node << r[1]
-    end
-  elsif json['engines'].class == String
-    r = json['engines'].match(/[^\d]+(\d.*)/)
-    node << r[1]
-  else # Hash
-    ver = json['engines']['node'].sub('*', '0.0.0')
-    if ver.index('||')
-      ver.split('||').each { |i| node << (i =~ /[^\d]+(\d.*)/ ? Regexp.last_match(1) : i).strip }
-    else
-      node << (ver =~ /[^\d]+(\d.*)/ ? Regexp.last_match(1) : ver)
-    end
-  end
+req.each do |k, v|
+  next if prov.keys.include?(k) && req_satisfy(prov[k], v)
+  print_req(k, v)
 end
 
-max = node.empty? ? nil : node.uniq.sort[-1]
-
-puts "nodejs(engine) >= #{max}" unless max.nil?
+unless engines.empty?
+  puts "nodejs(engine) >= " + engines.uniq.sort[-1]
+end
