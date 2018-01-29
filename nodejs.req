@@ -50,7 +50,7 @@ end
 def fill_engine(engine, array)
   return array if engine.nil?
   regex = /[^\d]+(\d+.*)/
-  case engine.class
+  case engine
   when Array
     engine.each {|e| array << regex_fill(e, regex) }
   when String
